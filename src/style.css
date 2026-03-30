@@ -1,0 +1,2071 @@
+/* ═══════════════════════════════════════════════════════════
+   KOEL'S NEW YEAR EGG ADVENTURE — Stylesheet
+   super_bg.png: 1773×886 → aspect-ratio ≈ 1773/886
+   sprite sheet: 1024×1024 → 4×4 grid, each cell 256×256
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Fonts ─────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* ─── Reset ─────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+button {
+	font-family: inherit;
+	cursor: pointer;
+}
+
+/* ─── CSS Variables ─────────────────────────────────────── */
+:root {
+	--gold: #e8a820;
+	--gold-light: #f7d87a;
+	--brown: #6b3a1f;
+	--parchment: #f2e8c8;
+	--bamboo: #5a7a2a;
+	--shadow: rgba(0, 0, 0, 0.65);
+	--bubble-bg: rgba(255, 252, 235, 0.93);
+	--bubble-border: #c9914a;
+}
+
+/* ─── Utility Classes ──────────────────────────────────────  */
+.hidden {
+	display: none !important;
+}
+
+/* ─── Body: bg.png fills entire viewport ───────────── */
+html,
+body {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+body {
+	background-image: url('../assets/images/bg.png');
+	background-position: center center;
+	background-repeat: no-repeat;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* ─── Game wrapper (centres the whole board) ─────────────── */
+#game-wrapper {
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* ─── Main game board: super_bg.png with shadow ────────────────── */
+#game-container {
+	position: relative;
+	/* super_bg.png is 1773 × 886 */
+	width: min(98vw, 1550px);
+	aspect-ratio: 1773 / 886;
+
+	background-image: url('../assets/images/super_bg.png');
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	background-position: center;
+
+	/* Drop shadow that echoes the dark vignette edges */
+	box-shadow:
+		0 0 60px 20px rgba(0, 0, 0, 0.70),
+		0 0 120px 40px rgba(0, 0, 0, 0.45),
+		0 30px 80px rgba(0, 0, 0, 0.50);
+
+	border-radius: 12px;
+	overflow: hidden;
+
+	/* Every child is positioned absolutely inside this */
+	user-select: none;
+}
+
+/* ─────────────────────────────────────────────────────────
+   STREAK / DAY display  (top-centre, right of side panel)
+   ───────────────────────────────────────────────────────── */
+#streak-display {
+	position: absolute;
+	top: 3.5%;
+	left: 25%;
+	right: 4%;
+	display: flex;
+	align-items: center;
+	gap: 2%;
+
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(10px, 1.1vw, 18px);
+	color: #fff8d6;
+	text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+#streak-label {
+	white-space: nowrap;
+	letter-spacing: 0.08em;
+	min-width: 0;
+}
+
+#streak-bar-outer {
+	flex: 1;
+	height: clamp(8px, 1.2vh, 16px);
+	background: rgba(0, 0, 0, 0.45);
+	border-radius: 20px;
+	border: 1.5px solid var(--gold);
+	overflow: hidden;
+}
+
+#streak-bar-fill {
+	height: 100%;
+	width: 0%;
+	background: linear-gradient(to right, #f07800, var(--gold), var(--gold-light));
+	border-radius: 20px;
+	transition: width 0.6s ease;
+	box-shadow: 0 0 6px rgba(240, 165, 0, 0.6);
+}
+
+/* ─────────────────────────────────────────────────────────
+   SIDE PANEL (bamboo announcement board, left)
+   ───────────────────────────────────────────────────────── */
+#side-panel {
+	position: absolute;
+	left: 1%;
+	top: 9%;
+	width: 21%;
+	/* height driven by background-size so content scrolls inside */
+	aspect-ratio: 454 / 640;
+	/* side_annoucement_panel.png proportions */
+
+	background-image: url('../assets/images/side_annoucement_panel.png');
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#side-panel-inner {
+	/* inset from bamboo border */
+	width: 72%;
+	height: 80%;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	gap: clamp(2px, 0.5vh, 6px);
+
+	font-family: 'Crimson Text', Georgia, serif;
+	font-size: clamp(8px, 0.95vw, 15px);
+	color: #3a2210;
+	line-height: 1.35;
+}
+
+#side-panel-inner h2 {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(9px, 1.05vw, 16px);
+	color: var(--brown);
+	text-align: center;
+	margin-bottom: 2px;
+	line-height: 1.25;
+}
+
+#side-panel-inner h3 {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(8px, 0.9vw, 13px);
+	color: var(--brown);
+	text-align: center;
+	margin-top: 2px;
+}
+
+#side-panel-inner p {
+	text-align: center;
+}
+
+#side-panel-inner p.small {
+	font-size: clamp(7px, 0.78vw, 12px);
+}
+
+#side-panel-inner strong {
+	color: var(--brown);
+}
+
+.panel-divider {
+	width: 80%;
+	margin: 2px auto;
+	border-top: 1px solid rgba(100, 60, 20, 0.35);
+}
+
+/* Health bar inside side panel */
+#health-display {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+	margin-top: 3px;
+}
+
+.health-label {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(7px, 0.75vw, 12px);
+	color: var(--brown);
+}
+
+#health-bar-outer {
+	width: 90%;
+	height: clamp(6px, 1vh, 12px);
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 10px;
+	border: 1px solid var(--brown);
+	overflow: hidden;
+}
+
+#health-bar-fill {
+	height: 100%;
+	width: 100%;
+	background: linear-gradient(to right, #4caf50, #8bc34a);
+	border-radius: 10px;
+	transition: width 0.6s ease, background 0.6s ease;
+}
+
+#health-value {
+	font-size: clamp(7px, 0.75vw, 12px);
+	color: var(--brown);
+}
+
+/* ─────────────────────────────────────────────────────────
+   EGG AREA — right-centre of the super_bg countryside scene
+   Egg sits on the open grassy path area on the right side
+   ───────────────────────────────────────────────────────── */
+#egg-area {
+	position: absolute;
+	/* Shifted right toward the open field area */
+	left: 62%;
+	top: 48%;
+
+	/* Large enough to hold nest + egg + surrounding action buttons */
+	width: 38%;
+	aspect-ratio: 1;
+
+	/* Centre the div on that point */
+	transform: translate(-50%, -50%);
+}
+
+/* Bird nest pot — behind the egg, centred */
+#nest-pot {
+	position: absolute;
+	left: 65%;
+	top: 55%;
+	transform: translate(-50%, -50%);
+
+	/* Wider than the egg so the pot is clearly visible */
+	width: 78%;
+	aspect-ratio: 656 / 511;
+	/* bird_nest_pot.png proportions */
+
+	background-image: url('../assets/images/bird_nest_pot.png');
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+
+	filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.45));
+	z-index: 1;
+}
+
+/* 3x3 Flower Pot Grid */
+#pot-grid {
+	position: absolute;
+	left: -55%;
+	bottom: 20%;
+
+	display: grid;
+	grid-template-columns: repeat(5, 80px);
+	/* Fixed column width */
+	grid-template-rows: repeat(2, 120px);
+	/* Fixed row height */
+	gap: 4px;
+	z-index: 50;
+	padding: 4px;
+}
+
+.pot-cell {
+	width: 100%;
+	height: 180px;
+	/* Fixed height for visibility */
+	position: relative;
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+	overflow: visible;
+}
+
+/* Pair of drums together (hand drums/bongos style) */
+.drum {
+	position: absolute;
+	width: 15%;
+	height: 20%;
+	aspect-ratio: 1;
+	background-image: url('../assets/images/drum.png');
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	image-rendering: crisp-edges;
+	filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+	cursor: pointer;
+	z-index: 3;
+	/* Higher than nest pot (1) and egg (2) */
+	transition: filter 0.2s ease;
+}
+
+.drum:hover {
+	filter: drop-shadow(0 8px 16px rgba(200, 120, 0, 0.5));
+}
+
+/* Position drums close together as a pair, below the nest */
+#drum-left {
+	left: 105%;
+	top: 72%;
+	z-index: 120;
+	transform: translate(-50%, -50%);
+}
+
+#drum-right {
+	left: 110%;
+	top: 57%;
+	transform: translate(-50%, -50%);
+}
+
+/* Alternating drum animation - left goes down when right goes up */
+#drum-left.drumming {
+	animation: drumLeft 0.15s ease-in-out infinite;
+}
+
+#drum-right.drumming {
+	animation: drumRight 0.15s ease-in-out infinite;
+}
+
+@keyframes drumLeft {
+
+	0%,
+	100% {
+		transform: translate(-50%, -50%) translateY(0px);
+	}
+
+	50% {
+		transform: translate(-50%, -50%) translateY(-10px);
+	}
+}
+
+@keyframes drumRight {
+
+	0%,
+	100% {
+		transform: translate(-50%, -50%) translateY(-10px);
+	}
+
+	50% {
+		transform: translate(-50%, -50%) translateY(0px);
+	}
+}
+
+/* The egg sprite (sprite sheet 1024×1024, 4×4 → 256px per cell) */
+#egg-sprite {
+	position: absolute;
+	left: 63%;
+	/* Sit inside the nest bowl — egg lower half nestled in the woven rim */
+	top: 44%;
+	transform: translate(-50%, -50%);
+
+	/* 44% of egg-area width — proportional to pot size */
+	width: 58%;
+	aspect-ratio: 1;
+
+	background-image: url('../assets/images/artslab_sprite_collection.png');
+	/* 400% × 400% → image is 4× the element = shows exactly 1 sprite */
+	background-size: 400% 400%;
+	background-position: 0% 0%;
+	/* updated by JS */
+	background-repeat: no-repeat;
+
+	/* Gentle floating animation */
+	animation: eggFloat 3s ease-in-out infinite;
+
+	/* Sit above the nest pot */
+	z-index: 2;
+
+	/* Make the sprite visible above bg */
+	filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+	image-rendering: crisp-edges;
+}
+
+/* Percentage relative to #egg-area's OWN width (via pseudo-parent trick):
+   Action buttons are positioned as % of #game-container because
+   egg-area is absolutely placed. We use left/top in % of egg-area. */
+
+/* ─── Action Buttons (speech-bubble style) ──────────────── */
+.action-btn {
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1px;
+
+	background: var(--bubble-bg);
+	border: 2px solid var(--bubble-border);
+	border-radius: 14px;
+	padding: clamp(3px, 0.4vh, 7px) clamp(5px, 0.6vw, 12px);
+
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(6px, 0.72vw, 11px);
+	color: var(--brown);
+	line-height: 1.2;
+	text-align: center;
+
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+	transition: transform 0.15s ease, opacity 0.3s ease, background 0.3s ease;
+	cursor: pointer;
+	z-index: 10;
+}
+
+.action-btn:hover:not(:disabled) {
+	transform: scale(1.08);
+	background: #fffbe0;
+	box-shadow: 0 4px 14px rgba(200, 120, 0, 0.4);
+}
+
+.action-btn:active:not(:disabled) {
+	transform: scale(0.96);
+}
+
+.action-btn .action-icon {
+	font-size: clamp(10px, 1.3vw, 20px);
+	line-height: 1;
+}
+
+.action-btn .action-text {
+	font-weight: 700;
+	letter-spacing: 0.03em;
+}
+
+.action-btn .action-count {
+	font-size: clamp(5px, 0.6vw, 9px);
+	color: #8a5020;
+}
+
+/* ── Completed state ── */
+.action-btn.done {
+	background: rgba(168, 220, 130, 0.88);
+	border-color: #5aa030;
+	color: #2a5010;
+	cursor: default;
+	opacity: 0.80;
+}
+
+.action-btn.done .action-count {
+	color: #2a5010;
+}
+
+/* ── Disabled global state (end of game) ── */
+.action-btn:disabled {
+	cursor: not-allowed;
+}
+
+/* ── Positions relative to #egg-area dimensions ──
+   (egg-area is 38% of game-container, ~441px at 1160px container)
+   We position as % of egg-area width/height */
+
+/* WATER — lower-left of egg */
+.water-btn {
+	left: 0%;
+	top: 58%;
+}
+
+/* SING — upper-center, floats above egg */
+.sing-btn {
+	left: 26%;
+	top: -5%;
+}
+
+/* FEED MOSS — lower-right */
+.feed-btn {
+	left: 70%;
+	top: 62%;
+}
+
+/* PROTECT FROM CROWS — upper-right */
+.protect-btn {
+	left: 75%;
+	top: 20%;
+}
+
+/* Small tail/arrow on each bubble pointing roughly toward egg */
+.action-btn::after {
+	content: '';
+	position: absolute;
+	width: 8px;
+	height: 8px;
+	background: var(--bubble-bg);
+	border-right: 2px solid var(--bubble-border);
+	border-bottom: 2px solid var(--bubble-border);
+}
+
+.water-btn::after {
+	right: -5px;
+	top: 40%;
+	transform: rotate(-45deg);
+}
+
+.sing-btn::after {
+	bottom: -5px;
+	left: 45%;
+	transform: rotate(45deg);
+}
+
+.feed-btn::after {
+	left: -5px;
+	top: 40%;
+	transform: rotate(135deg);
+}
+
+.protect-btn::after {
+	left: -5px;
+	top: 40%;
+	transform: rotate(135deg);
+}
+
+.action-btn.done::after {
+	background: rgba(168, 220, 130, 0.88);
+	border-color: #5aa030;
+}
+
+/* ─────────────────────────────────────────────────────────
+   BOTTOM CONTROLS STRIP
+   ───────────────────────────────────────────────────────── */
+#bottom-controls {
+	position: absolute;
+	bottom: 1.5%;
+	left: 2%;
+	right: 2%;
+	height: 18%;
+
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1%;
+}
+
+.bottom-cell {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 2px;
+	height: 100%;
+}
+
+/* ── Watering Can cell ── */
+#watering-can-cell {
+	flex: 0 0 auto;
+	width: 10%;
+}
+
+/* ── Tools icon cell ── */
+#tools-cell {
+	flex: 0 0 auto;
+	width: 10%;
+}
+
+#tools-img {
+	width: 100%;
+	max-width: 90px;
+	height: auto;
+	filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35));
+	transition: transform 0.2s ease;
+}
+
+#tools-img:hover {
+	transform: scale(1.08) rotate(-5deg);
+}
+
+/* ── Centre title panel (bottom_panel.png) ── */
+#title-cell {
+	flex: 1;
+	min-width: 0;
+}
+
+#bottom-panel-bg {
+	width: 100%;
+	height: 100%;
+	background-image: url('../assets/images/bottom_panel.png');
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 4% 6%;
+}
+
+#game-title-main {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(8px, 1.15vw, 18px);
+	color: var(--brown);
+	text-align: center;
+	letter-spacing: 0.04em;
+	line-height: 1.2;
+	text-shadow: 0 1px 2px rgba(255, 255, 200, 0.5);
+}
+
+#game-subtitle {
+	font-family: 'Crimson Text', serif;
+	font-size: clamp(7px, 0.9vw, 14px);
+	color: #7a5030;
+	font-style: italic;
+	text-align: center;
+	margin-top: 2px;
+}
+
+/* ── Coin Counter Panel ── */
+#coin-cell {
+	flex: 0 0 auto;
+	width: 14%;
+}
+
+#coin-counters {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	width: 100%;
+}
+
+.coin-counter {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 6px;
+	background: rgba(0, 0, 0, 0.45);
+	border-radius: 8px;
+	padding: 4px 8px;
+	border: 1px solid rgba(255, 215, 0, 0.35);
+}
+
+.coin-icon {
+	width: clamp(18px, 2.2vw, 32px);
+	height: auto;
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.coin-count {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(10px, 1.1vw, 16px);
+	color: #fff5c0;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+	letter-spacing: 0.02em;
+	font-weight: 700;
+}
+
+/* Animated flying coin */
+.flying-coin {
+	position: absolute;
+	width: clamp(24px, 2.8vw, 40px);
+	height: auto;
+	pointer-events: none;
+	z-index: 50;
+	filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+.bottom-label {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(5px, 0.6vw, 10px);
+	color: #fff5c0;
+	text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+	text-align: center;
+	letter-spacing: 0.05em;
+	white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────────────────────
+   MESSAGE OVERLAY (day complete, game over, hatch)
+   ───────────────────────────────────────────────────────── */
+#message-overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.60);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 100;
+	animation: fadeIn 0.3s ease;
+}
+
+#message-overlay.hidden {
+	display: none;
+}
+
+#message-box {
+	background: var(--parchment);
+	border: 3px solid var(--gold);
+	border-radius: 20px;
+	padding: clamp(16px, 2.5vw, 40px) clamp(24px, 3.5vw, 60px);
+	text-align: center;
+	max-width: 50%;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 0 6px rgba(232, 168, 32, 0.25);
+	animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#message-icon {
+	font-size: clamp(32px, 5vw, 72px);
+	line-height: 1;
+	margin-bottom: 10px;
+}
+
+#message-text {
+	font-family: 'Crimson Text', serif;
+	font-size: clamp(12px, 1.4vw, 22px);
+	color: var(--brown);
+	line-height: 1.5;
+	margin-bottom: 16px;
+}
+
+#message-close {
+	background: var(--gold);
+	color: var(--brown);
+	border: 2px solid var(--brown);
+	border-radius: 12px;
+	padding: 6px 24px;
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(10px, 1vw, 16px);
+	cursor: pointer;
+	transition: background 0.2s ease, transform 0.15s ease;
+}
+
+#message-close:hover {
+	background: var(--gold-light);
+	transform: scale(1.05);
+}
+
+/* ─────────────────────────────────────────────────────────
+   DEBUG PANEL (hidden by default, Ctrl+D to toggle)
+   ───────────────────────────────────────────────────────── */
+#debug-panel {
+	position: absolute;
+	top: 1%;
+	right: 1%;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	background: rgba(0, 0, 0, 0.55);
+	border-radius: 8px;
+	padding: 4px 8px;
+	z-index: 200;
+}
+
+#debug-panel.hidden {
+	display: none;
+}
+
+#debug-panel button {
+	font-size: 11px;
+	padding: 3px 8px;
+	border-radius: 6px;
+	border: 1px solid #888;
+	background: rgba(255, 255, 255, 0.9);
+	color: #222;
+	cursor: pointer;
+}
+
+#debug-info {
+	font-size: 10px;
+	color: #ddd;
+	font-family: monospace;
+}
+
+/* ─────────────────────────────────────────────────────────
+   ANIMATIONS
+   ───────────────────────────────────────────────────────── */
+@keyframes eggFloat {
+
+	0%,
+	100% {
+		transform: translate(-50%, -50%) translateY(0px);
+	}
+
+	50% {
+		transform: translate(-50%, -50%) translateY(-6px);
+	}
+}
+
+@keyframes eggPop {
+	0% {
+		transform: translate(-50%, -50%) scale(1);
+	}
+
+	40% {
+		transform: translate(-50%, -50%) scale(1.15);
+	}
+
+	70% {
+		transform: translate(-50%, -50%) scale(0.95);
+	}
+
+	100% {
+		transform: translate(-50%, -50%) scale(1);
+	}
+}
+
+/* Egg vibrates when drums are playing */
+@keyframes drumVibrate {
+
+	0%,
+	100% {
+		transform: translate(-50%, -50%) translateY(0px);
+	}
+
+	50% {
+		transform: translate(-50%, -50%) translateY(-6px);
+	}
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes popIn {
+	from {
+		transform: scale(0.6);
+		opacity: 0;
+	}
+
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+@keyframes sparkle {
+
+	0%,
+	100% {
+		filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4)) brightness(1);
+	}
+
+	50% {
+		filter: drop-shadow(0 6px 18px rgba(255, 200, 50, 0.7)) brightness(1.15);
+	}
+}
+
+/* Healthy egg sparkles */
+#egg-sprite.healthy {
+	animation: eggFloat 3s ease-in-out infinite, sparkle 2s ease-in-out infinite;
+}
+
+/* Unhealthy egg shakes occasionally */
+#egg-sprite.unhealthy {
+	animation: eggFloat 4s ease-in-out infinite;
+	filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4)) saturate(0.7);
+}
+
+/* Action complete flash */
+.action-btn.just-done {
+	animation: btnPop 0.4s ease;
+}
+
+@keyframes btnPop {
+	0% {
+		transform: scale(1);
+	}
+
+	50% {
+		transform: scale(1.20);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}
+
+/* Coin counter pop when coin is collected */
+@keyframes coinPop {
+	0% {
+		transform: scale(1);
+	}
+
+	50% {
+		transform: scale(1.15);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}
+
+/* ─────────────────────────────────────────────────────────
+   CROW / BIRD SYSTEM
+   crow_sprite.png — 7 frames horizontal strip
+   Frame 0 = stationary perch  |  Frames 1–6 = fly-away
+   ───────────────────────────────────────────────────────── */
+.crow {
+	position: absolute;
+	width: 5.5%;
+	aspect-ratio: 1;
+	background-image: url('../assets/images/crow_sprite.png');
+	background-size: 700% 100%;
+	background-position: 0% 0%;
+	background-repeat: no-repeat;
+	image-rendering: crisp-edges;
+	filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+	cursor: pointer;
+	z-index: 6;
+	transform-origin: center bottom;
+}
+
+/* Right-facing crow (default sprite faces left) */
+.crow.face-right {
+	transform: scaleX(-1);
+}
+
+/* Idle bob — two variants to preserve scaleX in keyframes */
+.crow.idle {
+	animation: crowIdleL 1.9s ease-in-out infinite;
+}
+
+.crow.face-right.idle {
+	animation: crowIdleR 1.9s ease-in-out infinite;
+}
+
+@keyframes crowIdleL {
+
+	0%,
+	100% {
+		transform: scaleX(1) translateY(0px);
+	}
+
+	50% {
+		transform: scaleX(1) translateY(-5px);
+	}
+}
+
+@keyframes crowIdleR {
+
+	0%,
+	100% {
+		transform: scaleX(-1) translateY(0px);
+	}
+
+	50% {
+		transform: scaleX(-1) translateY(-5px);
+	}
+}
+
+.crow.flying-in {
+	pointer-events: none;
+	animation: none !important;
+}
+
+.crow.flying-away {
+	pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────
+   WATERING CAN SYSTEM
+   Watering can sprite — 5 frames horizontal strip
+   Frame 0 = stationary can
+   Frames 1–4 = watering animation (tilted/pouring)
+   ───────────────────────────────────────────────────────── */
+#watering-can {
+	position: absolute;
+	width: 8%;
+	aspect-ratio: 1;
+	background-image: url('../assets/images/watering.png');
+	background-size: 500% 100%;
+	/* 5 frames horizontal */
+	background-position: 0% 0%;
+	/* Frame 0 by default */
+	background-repeat: no-repeat;
+	image-rendering: crisp-edges;
+	filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
+	cursor: grab;
+	z-index: 15;
+	transition: transform 0.2s ease;
+	transform-origin: center bottom;
+
+	/* Initial position: first cell in bottom-controls */
+	left: 7%;
+	bottom: 10%;
+	transform: translate(-50%, 0);
+}
+
+#watering-can.active {
+	filter: drop-shadow(0 6px 14px rgba(50, 150, 255, 0.6));
+	transform: translate(-50%, 0) scale(1.1);
+}
+
+#watering-can.dragging {
+	cursor: grabbing;
+	opacity: 0.7;
+	transform: translate(-50%, 0) scale(1.15);
+}
+
+body.watering-mode {
+	cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none"><circle cx="16" cy="16" r="8" fill="rgba(100,180,255,0.3)" stroke="rgba(50,150,255,0.8)" stroke-width="2"/></svg>') 16 16, auto;
+}
+
+body.watering-mode .pot-cell.has-plant:hover {
+	cursor: pointer;
+	filter: drop-shadow(0 6px 16px rgba(100, 180, 255, 0.5));
+	transform: scale(1.05);
+}
+
+/* ─────────────────────────────────────────────────────────
+   FLOWER POT GRID STYLES
+   ───────────────────────────────────────────────────────── */
+.pot-cell {
+	position: relative;
+	transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.pot-cell:hover {
+	filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+}
+
+/* Empty pot styling */
+.pot-cell.empty {
+	opacity: 1;
+	background-image: url('../assets/images/pot.png');
+	background-size: 100% 100%;
+	/* Force pot to fill cell */
+	background-repeat: no-repeat;
+	background-position: center center;
+	min-height: 80px;
+	/* Ensure visible height */
+	width: 100%;
+}
+
+.pot-cell.empty .pot-base {
+	display: none;
+}
+
+/* Plant sprite display */
+.pot-cell.has-plant {
+	position: relative;
+	aspect-ratio: 1 / 1.5;
+	/* Taller to accommodate full plant height */
+	/* Plant sprites already include the pot, so no background needed */
+	background: none;
+}
+
+.plant-sprite {
+	position: absolute;
+	inset: 0;
+	background-repeat: no-repeat;
+	background-size: 700% 100%;
+	/* 7 frames wide, fill height */
+	background-position-y: 0;
+	image-rendering: pixelated;
+	/* Better for pixel art */
+	pointer-events: none;
+	transition: background-position-x 0.5s ease;
+}
+
+/* Progress bar at bottom of pot */
+.pot-progress {
+	position: absolute;
+	bottom: 5%;
+	left: 10%;
+	right: 10%;
+	height: 4px;
+	background: rgba(0, 0, 0, 0.4);
+	border-radius: 2px;
+	overflow: hidden;
+	z-index: 10;
+}
+
+.pot-progress-fill {
+	height: 100%;
+	width: 0%;
+	border-radius: 2px;
+	transition: width 0.5s ease;
+	box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+}
+
+/* Watering dots indicator (3 dots showing waterings needed) */
+.watering-dots {
+	position: absolute;
+	top: 5%;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	gap: 3px;
+	z-index: 10;
+}
+
+.watering-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.3);
+	border: 1px solid rgba(0, 0, 0, 0.4);
+	transition: all 0.3s ease;
+}
+
+.watering-dot.filled {
+	background: rgba(100, 180, 255, 0.9);
+	border-color: rgba(50, 120, 200, 0.8);
+	box-shadow: 0 0 4px rgba(100, 180, 255, 0.6);
+}
+
+/* Fully grown badge */
+.fully-grown-badge {
+	position: absolute;
+	top: 5%;
+	right: 5%;
+	width: 20px;
+	height: 20px;
+	background: radial-gradient(circle, #ffd700, #ffaa00);
+	border: 2px solid #ff8800;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	color: #ffffff;
+	font-weight: bold;
+	z-index: 10;
+	box-shadow: 0 2px 8px rgba(255, 170, 0, 0.6);
+	animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+
+	0%,
+	100% {
+		transform: scale(1);
+	}
+
+	50% {
+		transform: scale(1.1);
+	}
+}
+
+/* Plant name label */
+.plant-name {
+	position: absolute;
+	bottom: -18px;
+	left: 50%;
+	transform: translateX(-50%);
+	font-family: 'Cinzel Decorative', serif;
+	font-size: 8px;
+	color: #fff5c0;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+	white-space: nowrap;
+	text-align: center;
+	z-index: 10;
+	pointer-events: none;
+}
+
+/* Being watered animation */
+.pot-cell.being-watered {
+	animation: potShake 0.6s ease;
+}
+
+@keyframes potShake {
+
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+
+	10%,
+	30%,
+	50%,
+	70%,
+	90% {
+		transform: translateX(-2px);
+	}
+
+	20%,
+	40%,
+	60%,
+	80% {
+		transform: translateX(2px);
+	}
+}
+
+/* Water drop animation */
+.water-drop {
+	position: absolute;
+	top: 0;
+	width: 8px;
+	height: 12px;
+	background: radial-gradient(ellipse at center, rgba(100, 180, 255, 0.9), rgba(50, 120, 200, 0.7));
+	border-radius: 50% 50% 50% 0;
+	transform: rotate(45deg);
+	pointer-events: none;
+	z-index: 15;
+	animation: waterDrop 0.8s ease forwards;
+}
+
+@keyframes waterDrop {
+	0% {
+		top: 0;
+		opacity: 1;
+	}
+
+	100% {
+		top: 80%;
+		opacity: 0;
+	}
+}
+
+/* Celebration animation */
+.pot-cell.celebrating {
+	animation: celebrate 1.5s ease;
+}
+
+@keyframes celebrate {
+
+	0%,
+	100% {
+		transform: scale(1) rotate(0deg);
+	}
+
+	25% {
+		transform: scale(1.05) rotate(-3deg);
+	}
+
+	50% {
+		transform: scale(1.1) rotate(3deg);
+	}
+
+	75% {
+		transform: scale(1.05) rotate(-2deg);
+	}
+}
+
+/* Sparkle particles for fully grown plants */
+.sparkle {
+	position: absolute;
+	width: 8px;
+	height: 8px;
+	background: radial-gradient(circle, #ffd700, #ffaa00);
+	border-radius: 50%;
+	pointer-events: none;
+	z-index: 20;
+	animation: sparkleFloat 1.5s ease forwards;
+}
+
+@keyframes sparkleFloat {
+	0% {
+		transform: translate(0, 0) scale(0);
+		opacity: 1;
+	}
+
+	50% {
+		transform: translate(0, -30px) scale(1);
+		opacity: 1;
+	}
+
+	100% {
+		transform: translate(0, -60px) scale(0);
+		opacity: 0;
+	}
+}
+
+/* Feedback message display */
+.plant-feedback {
+	position: absolute;
+	top: 30%;
+	left: 50%;
+	transform: translateX(-50%);
+	background: rgba(255, 252, 235, 0.95);
+	border: 2px solid var(--bubble-border);
+	border-radius: 12px;
+	padding: 12px 24px;
+	font-family: 'Crimson Text', serif;
+	font-size: clamp(12px, 1.2vw, 18px);
+	color: var(--brown);
+	text-align: center;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+	z-index: 80;
+	animation: feedbackSlideIn 0.3s ease;
+	max-width: 80%;
+}
+
+.plant-feedback.success {
+	background: rgba(168, 220, 130, 0.95);
+	border-color: #5aa030;
+	color: #2a5010;
+}
+
+.plant-feedback.error {
+	background: rgba(255, 200, 200, 0.95);
+	border-color: #d32f2f;
+	color: #8b0000;
+}
+
+.plant-feedback.fade-out {
+	animation: feedbackSlideOut 0.3s ease forwards;
+}
+
+@keyframes feedbackSlideIn {
+	from {
+		opacity: 0;
+		transform: translateX(-50%) translateY(-20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(-50%) translateY(0);
+	}
+}
+
+@keyframes feedbackSlideOut {
+	from {
+		opacity: 1;
+		transform: translateX(-50%) translateY(0);
+	}
+
+	to {
+		opacity: 0;
+		transform: translateX(-50%) translateY(-20px);
+	}
+}
+
+#watering-can:hover {
+	filter: drop-shadow(0 6px 14px rgba(50, 150, 255, 0.5));
+	transform: translate(-50%, 0) scale(1.05);
+}
+
+#watering-can.selected {
+	cursor: grabbing;
+	filter: drop-shadow(0 8px 18px rgba(50, 150, 255, 0.7));
+	z-index: 50;
+	transition: none;
+	/* Remove transition for smooth cursor following */
+	transform-origin: center center;
+}
+
+#watering-can.watering {
+	animation: wateringAnim 0.8s ease-in-out;
+}
+
+@keyframes wateringAnim {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	20% {
+		transform: rotate(-20deg);
+	}
+
+	40% {
+		transform: rotate(-35deg);
+	}
+
+	60% {
+		transform: rotate(-40deg);
+	}
+
+	80% {
+		transform: rotate(-25deg);
+	}
+
+	100% {
+		transform: rotate(0deg);
+	}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LEVEL 1: MAP EXPLORATION & MINI-GAMES
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Level 1 Screen ───────────────────────────────────────── */
+#level1-screen {
+	position: absolute;
+	inset: 0;
+	background-image: url('../bg.png');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	z-index: 5;
+}
+
+#level1-screen.hidden {
+	display: none;
+}
+
+/* ─── Map Container ────────────────────────────────────────── */
+#map-container {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+/* ─── Progress Panel ───────────────────────────────────────── */
+#level1-progress {
+	position: absolute;
+	top: 2%;
+	right: 2%;
+	background: rgba(0, 0, 0, 0.75);
+	border: 2px solid var(--gold);
+	border-radius: 12px;
+	padding: 12px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	z-index: 10;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.progress-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(10px, 1vw, 16px);
+	color: #fff5c0;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.progress-label {
+	font-weight: 600;
+}
+
+.progress-value {
+	color: var(--gold-light);
+	font-weight: 700;
+}
+
+/* ─── Hotspots ─────────────────────────────────────────────── */
+.hotspot {
+	position: absolute;
+	width: 60px;
+	height: 60px;
+	transform: translate(-50%, -50%);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: transform 0.3s ease, filter 0.3s ease;
+	z-index: 5;
+}
+
+.hotspot-icon {
+	font-size: 32px;
+	filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+	animation: hotspotPulse 2s ease-in-out infinite;
+}
+
+.hotspot.available .hotspot-icon {
+	animation: hotspotGlow 2s ease-in-out infinite;
+}
+
+.hotspot.completed {
+	cursor: default;
+	opacity: 0.7;
+}
+
+.hotspot.failed {
+	cursor: default;
+	opacity: 0.6;
+}
+
+.hotspot:hover .hotspot-tooltip {
+	opacity: 1;
+	transform: translateY(-10px);
+	pointer-events: auto;
+}
+
+.hotspot-tooltip {
+	position: absolute;
+	bottom: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	background: var(--parchment);
+	border: 2px solid var(--brown);
+	border-radius: 8px;
+	padding: 8px 12px;
+	font-family: 'Crimson Text', serif;
+	font-size: 12px;
+	color: var(--brown);
+	white-space: nowrap;
+	text-align: center;
+	line-height: 1.4;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.3s ease, transform 0.3s ease;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+	z-index: 20;
+}
+
+@keyframes hotspotPulse {
+
+	0%,
+	100% {
+		transform: scale(1);
+	}
+
+	50% {
+		transform: scale(1.1);
+	}
+}
+
+@keyframes hotspotGlow {
+
+	0%,
+	100% {
+		filter: drop-shadow(0 4px 8px rgba(255, 215, 0, 0.6));
+	}
+
+	50% {
+		filter: drop-shadow(0 6px 16px rgba(255, 215, 0, 0.9));
+	}
+}
+
+/* ─── Game Modal ───────────────────────────────────────────── */
+#game-modal {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.75);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 100;
+	animation: fadeIn 0.3s ease;
+}
+
+#game-modal.hidden {
+	display: none;
+}
+
+.game-modal-content {
+	position: relative;
+	background: var(--parchment);
+	border: 4px solid var(--gold);
+	border-radius: 20px;
+	padding: 24px;
+	width: min(90vw, 600px);
+	max-height: 85vh;
+	overflow-y: auto;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+	animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.game-modal-header {
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+.game-modal-header h2 {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(18px, 2.5vw, 28px);
+	color: var(--brown);
+	margin-bottom: 10px;
+}
+
+.game-reward-preview {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	font-family: 'Crimson Text', serif;
+	font-size: clamp(14px, 1.5vw, 20px);
+	color: var(--brown);
+}
+
+.reward-icon {
+	font-size: 24px;
+}
+
+.game-close-btn {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	background: var(--gold);
+	color: var(--brown);
+	border: 2px solid var(--brown);
+	border-radius: 50%;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 18px;
+	cursor: pointer;
+	transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.game-close-btn:hover {
+	background: var(--gold-light);
+	transform: scale(1.1);
+}
+
+/* ─── Narrator Help System ─────────────────────────────────── */
+#narrator-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.4);
+	z-index: 149;
+	animation: fadeIn 0.3s ease;
+	cursor: pointer;
+}
+
+#narrator-backdrop.fading-out {
+	animation: fadeOut 0.4s ease forwards;
+}
+
+#narrator-container {
+	position: absolute;
+	bottom: 5%;
+	left: -5%;
+	display: flex;
+	align-items: flex-end;
+	gap: 12px;
+	z-index: 150;
+	animation: narratorSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#narrator-container.sliding-out {
+	animation: narratorSlideOut 0.4s ease forwards;
+}
+
+#narrator-sprite {
+	width: 480px;
+	height: 750px;
+	background-image: url('../assets/images/narrator_closed.png');
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	image-rendering: crisp-edges;
+	filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6));
+	flex-shrink: 0;
+}
+
+#narrator-sprite.mouth-open {
+	background-image: url('../assets/images/narrator_open.png');
+}
+
+.narrator-dialog {
+	position: relative;
+	background: var(--parchment);
+	border: 3px solid var(--bubble-border);
+	border-radius: 16px;
+	padding: 16px 20px;
+	max-width: 400px;
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+	cursor: pointer;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.narrator-dialog:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.narrator-dialog-title {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(14px, 1.3vw, 18px);
+	color: var(--brown);
+	font-weight: 700;
+	margin-bottom: 8px;
+	text-align: center;
+}
+
+.narrator-dialog-text {
+	font-family: 'Crimson Text', serif;
+	font-size: clamp(12px, 1.1vw, 16px);
+	color: var(--brown);
+	line-height: 1.5;
+	margin-bottom: 12px;
+}
+
+.narrator-dismiss-hint {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(13px, 1.1vw, 16px);
+	color: var(--gold);
+	font-weight: 700;
+	text-align: center;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+	padding: 8px 16px;
+	background: rgba(232, 168, 32, 0.15);
+	border-radius: 8px;
+	border: 1px solid var(--gold);
+	animation: dismissHintPulse 2s ease-in-out infinite;
+	cursor: pointer;
+}
+
+/* Speech bubble tail pointing to narrator */
+.narrator-dialog::before {
+	content: '';
+	position: absolute;
+	left: -12px;
+	bottom: 20px;
+	width: 0;
+	height: 0;
+	border-top: 10px solid transparent;
+	border-bottom: 10px solid transparent;
+	border-right: 12px solid var(--bubble-border);
+}
+
+.narrator-dialog::after {
+	content: '';
+	position: absolute;
+	left: -9px;
+	bottom: 21px;
+	width: 0;
+	height: 0;
+	border-top: 9px solid transparent;
+	border-bottom: 9px solid transparent;
+	border-right: 11px solid var(--parchment);
+}
+
+@keyframes narratorSlideIn {
+	from {
+		transform: translateX(-150%);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes narratorSlideOut {
+	from {
+		transform: translateX(0);
+		opacity: 1;
+	}
+
+	to {
+		transform: translateX(-150%);
+		opacity: 0;
+	}
+}
+
+@keyframes dismissHintPulse {
+	0%, 100% {
+		transform: scale(1);
+		box-shadow: 0 0 0 0 rgba(232, 168, 32, 0.4);
+	}
+
+	50% {
+		transform: scale(1.05);
+		box-shadow: 0 0 8px 2px rgba(232, 168, 32, 0.6);
+	}
+}
+
+@keyframes fadeOut {
+	from {
+		opacity: 1;
+	}
+
+	to {
+		opacity: 0;
+	}
+}
+
+/* ─── Game Container ───────────────────────────────────────── */
+.game-container {
+	min-height: 300px;
+}
+
+/* ─── Tile Match Game ──────────────────────────────────────── */
+.tile-match-game {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+}
+
+.game-info {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: 16px;
+	color: var(--brown);
+}
+
+.tile-grid {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 8px;
+	width: 100%;
+	max-width: 400px;
+}
+
+.tile {
+	aspect-ratio: 1;
+	perspective: 1000px;
+	cursor: pointer;
+}
+
+.tile-inner {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	transition: transform 0.6s;
+	transform-style: preserve-3d;
+}
+
+.tile.flipped .tile-inner,
+.tile.matched .tile-inner {
+	transform: rotateY(180deg);
+}
+
+.tile-front,
+.tile-back {
+	position: absolute;
+	inset: 0;
+	backface-visibility: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 3px solid var(--brown);
+	border-radius: 8px;
+	font-size: 32px;
+	font-weight: bold;
+}
+
+.tile-front {
+	background: var(--gold);
+	color: var(--brown);
+}
+
+.tile-back {
+	background: var(--parchment);
+	transform: rotateY(180deg);
+}
+
+.tile.matched .tile-inner {
+	opacity: 0.5;
+}
+
+/* ─── Riddle Game ──────────────────────────────────────────── */
+.riddle-game {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.riddle-timer {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: 16px;
+	color: var(--brown);
+	text-align: center;
+}
+
+.riddle-question {
+	font-family: 'Crimson Text', serif;
+	font-size: clamp(16px, 1.8vw, 20px);
+	color: var(--brown);
+	text-align: center;
+	line-height: 1.6;
+	padding: 16px;
+	background: rgba(255, 255, 255, 0.5);
+	border-radius: 12px;
+	border: 2px solid var(--bubble-border);
+}
+
+.riddle-answers {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.riddle-answer-btn {
+	padding: 12px 20px;
+	font-family: 'Crimson Text', serif;
+	font-size: 16px;
+	color: var(--brown);
+	background: var(--gold-light);
+	border: 2px solid var(--brown);
+	border-radius: 12px;
+	cursor: pointer;
+	transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.riddle-answer-btn:hover:not(:disabled) {
+	background: var(--gold);
+	transform: scale(1.02);
+}
+
+.riddle-answer-btn:disabled {
+	cursor: not-allowed;
+}
+
+.riddle-answer-btn.correct {
+	background: rgba(168, 220, 130, 0.9);
+	border-color: #5aa030;
+	animation: btnPop 0.4s ease;
+}
+
+.riddle-answer-btn.wrong {
+	background: rgba(255, 200, 200, 0.9);
+	border-color: #d32f2f;
+	animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+
+	25% {
+		transform: translateX(-10px);
+	}
+
+	75% {
+		transform: translateX(10px);
+	}
+}
+
+/* ─── Tofu Hunter Game ─────────────────────────────────────── */
+.tofu-hunter-game {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.game-stats {
+	display: flex;
+	justify-content: space-around;
+	font-family: 'Cinzel Decorative', serif;
+	font-size: 16px;
+	color: var(--brown);
+}
+
+.tofu-play-area {
+	position: relative;
+	width: 100%;
+	height: 400px;
+	background: linear-gradient(to bottom, #87CEEB 0%, #f0f8ff 100%);
+	border: 3px solid var(--brown);
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.tofu-basket {
+	position: absolute;
+	bottom: 5%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 15%;
+	height: 40px;
+	background: linear-gradient(to bottom, #8B4513, #654321);
+	border: 2px solid var(--brown);
+	border-radius: 8px 8px 0 0;
+	transition: left 0.1s linear;
+	z-index: 5;
+}
+
+.tofu-falling {
+	position: absolute;
+	font-size: 28px;
+	transition: top 0.05s linear;
+	z-index: 1;
+}
+
+.tofu-controls {
+	font-family: 'Crimson Text', serif;
+	font-size: 14px;
+	color: var(--brown);
+	text-align: center;
+	font-style: italic;
+}
+
+/* ─── Game Result Screen ───────────────────────────────────── */
+.game-result {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+	padding: 40px 20px;
+	text-align: center;
+}
+
+.result-icon {
+	font-size: 64px;
+	animation: popIn 0.5s ease;
+}
+
+.game-result h2 {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(20px, 2.5vw, 32px);
+	color: var(--brown);
+}
+
+.game-result.win {
+	background: rgba(168, 220, 130, 0.2);
+	border-radius: 12px;
+}
+
+.game-result.lose {
+	background: rgba(255, 200, 200, 0.2);
+	border-radius: 12px;
+}
+
+.reward-display {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	margin: 16px 0;
+}
+
+.reward-icon-large {
+	font-size: 48px;
+	animation: sparkle 1.5s ease-in-out infinite;
+}
+
+.reward-name-large {
+	font-family: 'Crimson Text', serif;
+	font-size: 24px;
+	color: var(--brown);
+	font-weight: 600;
+}
+
+.result-btn {
+	background: var(--gold);
+	color: var(--brown);
+	border: 2px solid var(--brown);
+	border-radius: 12px;
+	padding: 10px 32px;
+	font-family: 'Cinzel Decorative', serif;
+	font-size: 16px;
+	cursor: pointer;
+	transition: background 0.2s ease, transform 0.15s ease;
+	margin-top: 16px;
+}
+
+.result-btn:hover {
+	background: var(--gold-light);
+	transform: scale(1.05);
+}
+
+/* ─── Responsive scaling for small screens ───────────────── */
+@media (max-width: 768px) {
+	#game-container {
+		width: 100vw;
+		border-radius: 0;
+	}
+
+	#side-panel {
+		width: 25%;
+		left: 0;
+		top: 8%;
+	}
+
+	#streak-display {
+		left: 28%;
+		font-size: 9px;
+	}
+}

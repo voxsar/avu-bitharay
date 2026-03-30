@@ -1,0 +1,14 @@
+{
+	"name": "avurudhu-bithara",
+	"version": "1.0.0",
+	"description": "Koel's New Year Egg Adventure — Protect and nurture an Asian Koel Egg over 14 days",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
+	},
+	"devDependencies": {
+		"vite": "^5.4.0"
+	}
+}

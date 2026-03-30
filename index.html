@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Koel's New Year Egg Adventure</title>
+	<link rel="stylesheet" href="src/style.css" />
+</head>
+
+<body>
+
+	<div id="game-wrapper">
+
+		<!-- ── LEVEL 1: MAP EXPLORATION SCREEN ────────────────────── -->
+		<div id="level1-screen" class="hidden">
+			<!-- Progress panel (top-right) -->
+			<div id="level1-progress"></div>
+
+			<!-- Map container with clickable hotspots -->
+			<div id="map-container"></div>
+
+			<!-- Game modal (for mini-games) -->
+			<div id="game-modal" class="hidden"></div>
+		</div>
+
+		<!-- ── MAIN GAME BOARD ─────────────────────────────────────── -->
+		<div id="game-container">
+
+			<!-- TOP: Streak / Day progress bar -->
+			<div id="streak-display">
+				<span id="streak-label">STREAK: DAY <span id="day-number">1</span></span>
+				<div id="streak-bar-outer">
+					<div id="streak-bar-fill"></div>
+				</div>
+			</div>
+
+			<!-- LEFT: Bamboo announcement panel -->
+			<div id="side-panel">
+				<div id="side-panel-inner">
+					<h2>A DAILY STREAK<br>ADVENTURE!</h2>
+					<p>Based on the Zen Garden style.</p>
+					<p>Protect and nurture an<br><strong>Asian Koel Egg.</strong></p>
+					<p>Complete small daily actions<br>to help it grow.</p>
+					<div class="panel-divider"></div>
+					<h3>RETURN EACH DAY!</h3>
+					<p class="small">Don't break your streak.</p>
+					<h3>WATCH IT HATCH!</h3>
+					<p class="small">On Sinhala &amp; Tamil<br>New Year Day!</p>
+					<div id="health-display">
+						<span class="health-label">Egg Health</span>
+						<div id="health-bar-outer">
+							<div id="health-bar-fill"></div>
+						</div>
+						<span id="health-value">100%</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- CENTER: Egg with surrounding action buttons -->
+			<div id="egg-area">
+
+				<!-- Drums on either side of nest -->
+				<div class="drum" id="drum-left"></div>
+				<div class="drum" id="drum-right"></div>
+
+				<!-- Bird nest pot sits behind the egg -->
+				<div id="nest-pot"></div>
+
+				<!-- 3x3 Flower Pot Grid -->
+				<div id="pot-grid">
+					<div class="pot-cell"></div>
+					<div class="pot-cell"></div>
+					<div class="pot-cell"></div>
+					<div class="pot-cell"></div>
+					<div class="pot-cell"></div>
+					<div class="pot-cell"></div>
+					<div class="pot-cell"></div>
+					<div class="pot-cell"></div>
+					<div class="pot-cell"></div>
+				</div>
+
+				<!-- The egg sprite (from artslab_sprite_collection.png) -->
+				<div id="egg-sprite"></div>
+
+			</div><!-- /egg-area -->
+
+			<!-- OVERLAY: Notification / end-state messages -->
+			<div id="message-overlay" class="hidden">
+				<div id="message-box">
+					<div id="message-icon"></div>
+					<p id="message-text"></p>
+					<button id="message-close">OK</button>
+				</div>
+			</div>
+
+			<!-- BOTTOM: Controls strip -->
+			<div id="bottom-controls">
+
+				<!-- Watering Can (draggable tool) -->
+				<div class="bottom-cell" id="watering-can-cell">
+					<div id="watering-can"></div>
+					<span class="bottom-label">WATERING CAN</span>
+				</div>
+				<div class="bottom-cell" id="tools-cell">
+					<img src="assets/images/tools.png" id="tools-img" alt="Daily Actions" />
+					<span class="bottom-label">DAILY ACTIONS</span>
+				</div>
+
+				<!-- Center title panel (bottom_panel.png) -->
+				<div class="bottom-cell" id="title-cell">
+					<div id="bottom-panel-bg">
+						<div id="game-title-main">KOEL'S NEW YEAR EGG ADVENTURE</div>
+						<div id="game-subtitle">Daily Habit &amp; Protection Game.</div>
+					</div>
+				</div>
+
+				<!-- Coin Counter Panel -->
+				<div class="bottom-cell" id="coin-cell">
+					<div id="coin-counters">
+						<div class="coin-counter" id="gold-counter">
+							<img src="assets/images/coin.png" class="coin-icon" alt="Gold Coin" />
+							<span class="coin-count">x<span id="gold-count">0</span></span>
+						</div>
+						<div class="coin-counter" id="red-counter">
+							<img src="assets/images/coin_red.png" class="coin-icon" alt="Red Coin" />
+							<span class="coin-count">x<span id="red-count">0</span></span>
+						</div>
+						<div class="coin-counter" id="silver-counter">
+							<img src="assets/images/coin_silver.png" class="coin-icon" alt="Silver Coin" />
+							<span class="coin-count">x<span id="silver-count">0</span></span>
+						</div>
+					</div>
+					<span class="bottom-label">COIN COLLECTION</span>
+				</div>
+
+			</div><!-- /bottom-controls -->
+			<button id="debug-next-day">⏭ Next Day</button>
+			<button id="debug-reset">🔄 Reset</button>
+			<span id="debug-info"></span>
+		</div>
+
+	</div><!-- /game-container -->
+	</div><!-- /game-wrapper -->
+
+	<script type="module" src="src/main.js"></script>
+</body>
+
+</html>
