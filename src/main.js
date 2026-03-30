@@ -20,6 +20,7 @@ import './plantDebug.js'; // Debug helpers for testing plants
 import { plantInPot } from './plantDebug.js';
 import { initLevel1 } from './level1.js';
 import './level1Debug.js'; // Debug helpers for Level 1
+import { getLocalPlayer, submitScore, computeScore } from './api.js';
 
 // ─── Constants ────────────────────────────────────────────────
 const STORAGE_KEY = 'avurudhu_bithara_v1';
@@ -268,6 +269,9 @@ function handleAction(state, action) {
 		applyHealthDelta(state, 4);
 		state.streak++;
 
+		// Nilame Ayya appears to bless the egg when all actions are complete
+		setTimeout(showNilameAyya, 1500);
+
 		// Win condition: complete all actions on day 14
 		if (state.currentDay >= TOTAL_DAYS) {
 			state.phase = 'hatched';
@@ -296,6 +300,13 @@ function handleAction(state, action) {
 }
 
 function triggerHatchEnding(state) {
+	// Submit final score to backend (fire-and-forget)
+	submitScore(state).then(result => {
+		if (result) {
+			console.log(`Score submitted — rank #${result.rank}`);
+		}
+	});
+
 	if (state.eggHealth >= 75) {
 		showMessage(
 			'🐣',
@@ -322,6 +333,9 @@ function triggerHatchEnding(state) {
 // ─── Phase screens ────────────────────────────────────────────
 function checkEndStates(state) {
 	if (state.phase === 'gameover') {
+		// Submit score to backend before resetting (fire-and-forget)
+		submitScore(state);
+
 		showMessage(
 			'💔',
 			`<strong>The egg didn't make it…</strong><br>
@@ -582,6 +596,12 @@ function init() {
 
 	// ── Plant system ──
 	initPlantUI();
+
+	// ── Witch antagonist events ──
+	startWitchSystem();
+
+	// ── Player registration prompt ──
+	maybeShowRegistrationPrompt();
 }
 
 // ─── Coin Animation System ────────────────────────────────────
@@ -750,6 +770,214 @@ function startBackgroundMusic() {
 	// Start first play after initial delay (5-10 seconds after page load)
 	const initialDelay = 5000 + Math.random() * 5000;
 	setTimeout(playRandomBackground, initialDelay);
+}
+
+// ─── Nilame Ayya Character System ────────────────────────────
+/**
+ * Nilame Ayya — a friendly traditional Sri Lankan official who visits
+ * to bless the egg. He appears after the player completes all four
+ * daily actions (and randomly at other positive moments).
+ * Audio: assets/audio/nilame.ogg
+ */
+let nilameVisible = false;
+
+function showNilameAyya() {
+	if (nilameVisible) return;
+	const container = $('game-container');
+	if (!container) return;
+
+	nilameVisible = true;
+
+	// Play nilame sound
+	const audio = new Audio('assets/audio/nilame.ogg');
+	audio.play().catch(err => console.log('Nilame audio play failed:', err));
+
+	// Create character element
+	const el = document.createElement('div');
+	el.id = 'nilame-ayya';
+	el.className = 'character-sprite nilame-enter';
+	el.title = 'Nilame Ayya — Click to greet!';
+	el.setAttribute('aria-label', 'Nilame Ayya is here to bless your egg!');
+
+	container.appendChild(el);
+
+	// Dismiss on click with a little wave sound
+	el.addEventListener('click', () => hideNilameAyya(el));
+
+	// Auto-dismiss after 10 seconds
+	setTimeout(() => hideNilameAyya(el), 10000);
+}
+
+function hideNilameAyya(el) {
+	if (!el || !el.parentNode) return;
+	el.classList.add('character-exit');
+	setTimeout(() => {
+		el.remove();
+		nilameVisible = false;
+	}, 600);
+}
+
+// ─── Witch Character System ───────────────────────────────────
+/**
+ * The Witch — an antagonist who tries to curse the egg. She appears
+ * randomly during gameplay (more often when egg health is low).
+ * Players must click her to chase her away; ignoring her costs health.
+ * Audio: assets/audio/witch.mp3
+ */
+let witchVisible = false;
+let witchTimer = null;
+
+function startWitchSystem() {
+	scheduleNextWitch();
+}
+
+function scheduleNextWitch() {
+	// Appear every 2–5 minutes; more often when egg health is low
+	const baseDelay = 120000; // 2 minutes
+	const randomExtra = Math.random() * 180000; // 0–3 minutes
+	witchTimer = setTimeout(spawnWitch, baseDelay + randomExtra);
+}
+
+function spawnWitch() {
+	if (witchVisible) {
+		scheduleNextWitch();
+		return;
+	}
+
+	const container = $('game-container');
+	if (!container) return;
+
+	witchVisible = true;
+
+	// Play witch sound
+	const audio = new Audio('assets/audio/witch.mp3');
+	audio.play().catch(err => console.log('Witch audio play failed:', err));
+
+	const el = document.createElement('div');
+	el.id = 'witch-character';
+	el.className = 'character-sprite witch-enter';
+	el.title = 'The Witch! Click to chase her away!';
+	el.setAttribute('aria-label', 'A witch appeared! Click to chase her away!');
+
+	container.appendChild(el);
+
+	// Flash a warning message
+	showMessage(
+		'🧙‍♀️',
+		'<strong>A witch appeared!</strong><br>Click her quickly to chase her away!',
+		null
+	);
+
+	// Player must click within 8 seconds or lose health
+	let dismissed = false;
+
+	el.addEventListener('click', () => {
+		dismissed = true;
+		// Reward: silver coin for acting fast
+		spawnCoin('silver', el);
+		hideWitch(el);
+		scheduleNextWitch();
+	});
+
+	setTimeout(() => {
+		if (!dismissed) {
+			// Witch wasn't chased — apply health penalty to current state
+			const state = loadState();
+			if (state.phase === 'playing') {
+				state.eggHealth = Math.max(0, state.eggHealth - 10);
+				if (state.eggHealth <= 0) state.phase = 'gameover';
+				saveState(state);
+				updateUI(state);
+				checkEndStates(state);
+			}
+			hideWitch(el);
+		}
+		scheduleNextWitch();
+	}, 8000);
+}
+
+function hideWitch(el) {
+	if (!el || !el.parentNode) return;
+	el.classList.add('character-exit');
+	setTimeout(() => {
+		el.remove();
+		witchVisible = false;
+	}, 600);
+}
+
+// ─── Player Registration UI ───────────────────────────────────
+/**
+ * Shows a lightweight registration prompt if the player has not yet
+ * registered. Scores are still saved locally when not registered;
+ * registration just allows the player to appear on the leaderboard.
+ */
+function maybeShowRegistrationPrompt() {
+	if (getLocalPlayer()) return; // Already registered
+
+	// Only show after a short delay so it doesn't feel intrusive
+	setTimeout(() => {
+		showRegistrationModal();
+	}, 3000);
+}
+
+function showRegistrationModal() {
+	// Don't stack on top of existing modals
+	if (!$('message-overlay').classList.contains('hidden')) return;
+
+	const overlay = document.createElement('div');
+	overlay.id = 'registration-overlay';
+	overlay.innerHTML = `
+		<div id="registration-box">
+			<div id="registration-icon">🏆</div>
+			<h3>Join the Leaderboard!</h3>
+			<p>Register a name to save your score online and compete with others.</p>
+			<input type="text" id="reg-username" maxlength="30" placeholder="Your player name…" autocomplete="off" />
+			<input type="email" id="reg-email" maxlength="100" placeholder="Email (optional)" autocomplete="off" />
+			<div id="reg-error" class="reg-error hidden"></div>
+			<div id="reg-buttons">
+				<button id="reg-submit">Register</button>
+				<button id="reg-skip">Play as Guest</button>
+			</div>
+		</div>
+	`;
+	document.body.appendChild(overlay);
+
+	const usernameEl = overlay.querySelector('#reg-username');
+	const emailEl = overlay.querySelector('#reg-email');
+	const errorEl = overlay.querySelector('#reg-error');
+	const submitBtn = overlay.querySelector('#reg-submit');
+	const skipBtn = overlay.querySelector('#reg-skip');
+
+	usernameEl.focus();
+
+	submitBtn.addEventListener('click', async () => {
+		const username = usernameEl.value.trim();
+		if (!username || username.length < 2) {
+			errorEl.textContent = 'Please enter a name with at least 2 characters.';
+			errorEl.classList.remove('hidden');
+			return;
+		}
+
+		submitBtn.disabled = true;
+		submitBtn.textContent = 'Registering…';
+		errorEl.classList.add('hidden');
+
+		try {
+			const { registerPlayer } = await import('./api.js');
+			await registerPlayer(username, emailEl.value.trim());
+			overlay.remove();
+		} catch (err) {
+			errorEl.textContent = err.message || 'Registration failed. Try a different name.';
+			errorEl.classList.remove('hidden');
+			submitBtn.disabled = false;
+			submitBtn.textContent = 'Register';
+		}
+	});
+
+	skipBtn.addEventListener('click', () => overlay.remove());
+
+	// Allow Enter key to submit
+	usernameEl.addEventListener('keydown', e => { if (e.key === 'Enter') submitBtn.click(); });
 }
 
 // ─── Watering Can System ──────────────────────────────────
