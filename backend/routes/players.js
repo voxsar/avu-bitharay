@@ -58,6 +58,25 @@ router.post('/register', (req, res) => {
 	}
 });
 
+// ─── POST /api/players/login ──────────────────────────────────
+router.post('/login', (req, res) => {
+	const { username, token } = req.body || {};
+
+	if (!username || typeof username !== 'string' || !token || typeof token !== 'string') {
+		return res.status(400).json({ error: 'username and token are required' });
+	}
+
+	const player = db.prepare(
+		'SELECT id, username, email FROM players WHERE username = ? AND token = ?'
+	).get(username.trim(), token.trim());
+
+	if (!player) {
+		return res.status(401).json({ error: 'Invalid username or token' });
+	}
+
+	return res.json({ playerId: player.id, username: player.username, token: token.trim() });
+});
+
 // ─── GET /api/players/:id ─────────────────────────────────────
 router.get('/:id', (req, res) => {
 	const token = extractToken(req);

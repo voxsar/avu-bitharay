@@ -6,6 +6,8 @@
  * Each stage requires 3 waterings to advance to the next stage.
  */
 
+import { savePlantProgress } from './api.js';
+
 // ─── Plant Types ──────────────────────────────────────────────
 export const PLANT_TYPES = {
 	ROSE: 'rose',
@@ -43,66 +45,51 @@ export const PLANT_CONFIG = {
 const TOTAL_POTS = 9;
 const TOTAL_STAGES = 7;  // Stages 0-6
 const WATERINGS_PER_STAGE = 3;
-const PLANTS_STORAGE_KEY = 'avurudhu_bithara_plants_v1';
-
-// ─── Pot State Structure ──────────────────────────────────────
-/**
- * Each pot has:
- * - plantType: string | null (e.g., 'rose', 'sunflower', or null for empty)
- * - stage: number (0-6, where 0 is sprout and 6 is fully grown)
- * - waterings: number (0-2, current waterings for this stage)
- * - lastWatered: ISO date string (tracks when it was last watered)
- */
 
 function makeEmptyPot() {
-	return {
-		plantType: null,
-		stage: 0,
-		waterings: 0,
-		lastWatered: null
-	};
+	return { plantType: null, stage: 0, waterings: 0, lastWatered: null };
 }
 
 function makeDefaultPotState() {
 	return Array.from({ length: TOTAL_POTS }, () => makeEmptyPot());
 }
 
-// ─── State Management ─────────────────────────────────────────
-export function loadPlantState() {
-	try {
-		const raw = localStorage.getItem(PLANTS_STORAGE_KEY);
-		if (!raw) return makeDefaultPotState();
-		const parsed = JSON.parse(raw);
-		// Ensure we always have exactly 9 pots
-		if (!Array.isArray(parsed) || parsed.length !== TOTAL_POTS) {
-			return makeDefaultPotState();
-		}
+// ─── Module-level state cache (populated from DB on startup) ──
+let _plantStateCache = null;
 
-		// Clean up invalid plant types (e.g., deleted plants)
-		let needsSave = false;
-		parsed.forEach(pot => {
+/**
+ * Initialise the plant state cache from data loaded out of the database.
+ * Called once during the startup loading flow before the game starts.
+ * @param {Array|null} pots - raw array from DB, or null for a fresh save
+ */
+export function setPlantStateCache(pots) {
+	if (Array.isArray(pots) && pots.length === TOTAL_POTS) {
+		// Sanitise invalid plant types
+		pots.forEach(pot => {
 			if (pot.plantType && !PLANT_CONFIG[pot.plantType]) {
-				console.warn(`Removing invalid plant type: ${pot.plantType}`);
 				pot.plantType = null;
 				pot.stage = 0;
 				pot.waterings = 0;
 				pot.lastWatered = null;
-				needsSave = true;
 			}
 		});
-
-		if (needsSave) {
-			savePlantState(parsed);
-		}
-
-		return parsed;
-	} catch {
-		return makeDefaultPotState();
+		_plantStateCache = pots;
+	} else {
+		_plantStateCache = makeDefaultPotState();
 	}
 }
 
+// ─── State Management ─────────────────────────────────────────
+export function loadPlantState() {
+	if (!_plantStateCache) {
+		_plantStateCache = makeDefaultPotState();
+	}
+	return _plantStateCache;
+}
+
 export function savePlantState(potState) {
-	localStorage.setItem(PLANTS_STORAGE_KEY, JSON.stringify(potState));
+	_plantStateCache = potState;
+	savePlantProgress(potState);
 }
 
 // ─── Pot Actions ──────────────────────────────────────────────

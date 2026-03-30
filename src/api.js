@@ -9,9 +9,10 @@ const API_BASE =
 		? 'http://localhost:3000/api'
 		: '/api';
 
+// Only the player key (token) is stored in localStorage — all game progress is in the DB.
 const PLAYER_KEY = 'avurudhu_player_v1';
 
-// ─── Local player persistence ─────────────────────────────────
+// ─── Local player persistence (token only) ────────────────────
 export function getLocalPlayer() {
 	try {
 		const raw = localStorage.getItem(PLAYER_KEY);
@@ -22,7 +23,33 @@ export function getLocalPlayer() {
 }
 
 function saveLocalPlayer(player) {
-	localStorage.setItem(PLAYER_KEY, JSON.stringify(player));
+	// Only persist the minimal credentials needed for authentication
+	localStorage.setItem(PLAYER_KEY, JSON.stringify({
+		playerId: player.playerId,
+		username: player.username,
+		token: player.token,
+	}));
+}
+
+// ─── Player login ─────────────────────────────────────────────
+/**
+ * Log in with an existing username + token pair.
+ * @param {string} username
+ * @param {string} token
+ * @returns {Promise<{playerId, username, token}>}
+ */
+export async function loginPlayer(username, token) {
+	const res = await fetch(`${API_BASE}/players/login`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ username, token }),
+	});
+
+	const data = await res.json();
+	if (!res.ok) throw new Error(data.error || 'Login failed');
+
+	saveLocalPlayer({ playerId: data.playerId, username: data.username, token: data.token });
+	return data;
 }
 
 // ─── Player registration ──────────────────────────────────────
@@ -49,10 +76,71 @@ export async function registerPlayer(username, email = '') {
 	return data;
 }
 
+// ─── Progress persistence (DB-backed) ────────────────────────
+/**
+ * Load all progress for the authenticated player from the database.
+ * @returns {Promise<{game, level1, plants}>}
+ */
+export async function loadAllProgress() {
+	const player = getLocalPlayer();
+	if (!player) return { game: null, level1: null, plants: null };
+
+	try {
+		const res = await fetch(`${API_BASE}/progress/all`, {
+			headers: { Authorization: `Bearer ${player.token}` },
+		});
+		if (!res.ok) return { game: null, level1: null, plants: null };
+		return await res.json();
+	} catch {
+		return { game: null, level1: null, plants: null };
+	}
+}
+
+/**
+ * Save the main game state to the database (fire-and-forget).
+ * @param {object} state
+ */
+export function saveGameProgress(state) {
+	const player = getLocalPlayer();
+	if (!player) return;
+	fetch(`${API_BASE}/progress/game`, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${player.token}` },
+		body: JSON.stringify({ state }),
+	}).catch(() => { /* silent fail */ });
+}
+
+/**
+ * Save the level-1 exploration state to the database (fire-and-forget).
+ * @param {object} state
+ */
+export function saveLevel1Progress(state) {
+	const player = getLocalPlayer();
+	if (!player) return;
+	fetch(`${API_BASE}/progress/level1`, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${player.token}` },
+		body: JSON.stringify({ state }),
+	}).catch(() => { /* silent fail */ });
+}
+
+/**
+ * Save the plant pot state to the database (fire-and-forget).
+ * @param {Array} pots
+ */
+export function savePlantProgress(pots) {
+	const player = getLocalPlayer();
+	if (!player) return;
+	fetch(`${API_BASE}/progress/plants`, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${player.token}` },
+		body: JSON.stringify({ state: pots }),
+	}).catch(() => { /* silent fail */ });
+}
+
 // ─── Submit score ─────────────────────────────────────────────
 /**
  * Submit the player's final game score.
- * Silently fails if the player is not registered — score is local-only.
  * @param {object} state  - game state object
  * @returns {Promise<{scoreId, rank}|null>}
  */
@@ -83,7 +171,6 @@ export async function submitScore(state) {
 		if (!res.ok) return null;
 		return await res.json();
 	} catch {
-		// Network error — score stays local
 		return null;
 	}
 }

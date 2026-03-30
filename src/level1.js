@@ -9,9 +9,9 @@
 import { switchLevel, saveState, loadState, showMessage } from './main.js';
 import { initLevel1UI, updateProgressDisplay, showGameModal, showNarratorHelp } from './level1UI.js';
 import { TileMatchGame, RiddleGame, TofuHunterGame } from './miniGames.js';
+import { saveLevel1Progress } from './api.js';
 
 // ─── Constants ────────────────────────────────────────────────
-const LEVEL1_STORAGE_KEY = 'avurudhu_bithara_level1_v1';
 const TOTAL_HOTSPOTS = 12;
 const GAME_TYPES = ['tilematch', 'riddle', 'tofuhunter'];
 const PLANT_TYPES = ['rose', 'marigold', 'sunflower', 'daffodil'];
@@ -29,18 +29,27 @@ function makeDefaultLevel1State() {
 	};
 }
 
-function loadLevel1State() {
-	try {
-		const raw = localStorage.getItem(LEVEL1_STORAGE_KEY);
-		if (!raw) return makeDefaultLevel1State();
-		return { ...makeDefaultLevel1State(), ...JSON.parse(raw) };
-	} catch {
-		return makeDefaultLevel1State();
+/**
+ * Initialise the level-1 state cache from data loaded out of the database.
+ * Called once during the startup loading flow before the game starts.
+ * @param {object|null} saved - raw object from DB, or null for a fresh start
+ */
+export function setLevel1StateCache(saved) {
+	if (saved && typeof saved === 'object') {
+		level1State = { ...makeDefaultLevel1State(), ...saved };
+	} else {
+		level1State = null; // will be initialised on first loadLevel1State() call
 	}
 }
 
+function loadLevel1State() {
+	if (!level1State) return makeDefaultLevel1State();
+	return level1State;
+}
+
 function saveLevel1State(state) {
-	localStorage.setItem(LEVEL1_STORAGE_KEY, JSON.stringify(state));
+	level1State = state;
+	saveLevel1Progress(state);
 }
 
 // ─── Hotspot Generation ───────────────────────────────────────

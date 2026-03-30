@@ -2120,104 +2120,267 @@ to   { transform: translateX(0) scale(0.5); opacity: 0; }
 .witch-enter   { animation: characterEnterRight 0.5s ease forwards; }
 .character-exit { animation: characterExit 0.5s ease forwards; }
 
-/* ─── Player Registration Modal ──────────────────────────────── */
-#registration-overlay {
-position: fixed;
-inset: 0;
-background: rgba(0, 0, 0, 0.6);
-display: flex;
-align-items: center;
-justify-content: center;
-z-index: 200;
+/* ─── Auth Screen ─────────────────────────────────────────────── */
+#auth-screen {
+	position: fixed;
+	inset: 0;
+	background-image: url('../assets/images/bg.png');
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 300;
 }
 
-#registration-box {
-background: #fffbe6;
-border: 3px solid #c8a227;
-border-radius: 16px;
-padding: 28px 32px;
-max-width: 360px;
-width: 90%;
-text-align: center;
-box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-font-family: inherit;
+#auth-box {
+	background: rgba(255, 248, 220, 0.97);
+	border: 3px solid var(--gold);
+	border-radius: 18px;
+	padding: 32px 36px;
+	width: min(420px, 92vw);
+	text-align: center;
+	box-shadow: 0 12px 48px rgba(0, 0, 0, 0.55);
+	font-family: 'Crimson Text', Georgia, serif;
 }
 
-#registration-icon {
-font-size: 2.5rem;
-margin-bottom: 8px;
+#auth-icon {
+	font-size: 3rem;
+	margin-bottom: 6px;
 }
 
-#registration-box h3 {
-margin: 0 0 8px;
-color: #7a4800;
-font-size: 1.2rem;
+#auth-title {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(14px, 2.2vw, 22px);
+	color: var(--brown);
+	margin: 0 0 20px;
+	line-height: 1.3;
 }
 
-#registration-box p {
-font-size: 0.9rem;
-color: #555;
-margin-bottom: 16px;
+#auth-tabs {
+	display: flex;
+	gap: 8px;
+	justify-content: center;
+	margin-bottom: 20px;
 }
 
-#registration-box input {
-display: block;
-width: 100%;
-box-sizing: border-box;
-margin-bottom: 10px;
-padding: 9px 12px;
-border: 2px solid #c8a227;
-border-radius: 8px;
-font-size: 1rem;
-font-family: inherit;
-background: #fff;
-color: #333;
+.auth-tab {
+	flex: 1;
+	padding: 9px 0;
+	border: 2px solid var(--gold);
+	border-radius: 8px;
+	background: transparent;
+	color: var(--brown);
+	font-family: 'Cinzel Decorative', serif;
+	font-size: 0.85rem;
+	cursor: pointer;
+	transition: background 0.2s, color 0.2s;
 }
 
-#registration-box input:focus {
-outline: none;
-border-color: #e07b00;
+.auth-tab.active,
+.auth-tab:hover {
+	background: var(--gold);
+	color: #fff;
 }
 
-.reg-error {
-color: #c0392b;
-font-size: 0.85rem;
-margin-bottom: 10px;
+#login-form input,
+#register-form input {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	margin-bottom: 12px;
+	padding: 10px 14px;
+	border: 2px solid var(--gold);
+	border-radius: 8px;
+	font-size: 1rem;
+	font-family: inherit;
+	background: #fff;
+	color: #333;
 }
 
-.reg-error.hidden { display: none; }
-
-#reg-buttons {
-display: flex;
-gap: 10px;
-justify-content: center;
-margin-top: 4px;
+#login-form input:focus,
+#register-form input:focus {
+	outline: none;
+	border-color: #e07b00;
+	box-shadow: 0 0 0 2px rgba(224, 123, 0, 0.2);
 }
 
-#reg-submit {
-background: #e07b00;
-color: #fff;
-border: none;
-border-radius: 8px;
-padding: 10px 22px;
-font-size: 1rem;
-cursor: pointer;
-font-family: inherit;
-font-weight: bold;
+.auth-btn {
+	width: 100%;
+	padding: 11px 0;
+	background: var(--gold);
+	color: #fff;
+	border: none;
+	border-radius: 8px;
+	font-size: 1rem;
+	font-family: 'Cinzel Decorative', serif;
+	cursor: pointer;
+	transition: background 0.2s;
+	margin-top: 4px;
 }
 
-#reg-submit:hover { background: #c86b00; }
-#reg-submit:disabled { background: #aaa; cursor: not-allowed; }
+.auth-btn:hover { background: #c86b00; }
+.auth-btn:disabled { background: #aaa; cursor: not-allowed; }
 
-#reg-skip {
-background: transparent;
-color: #888;
-border: 2px solid #ccc;
-border-radius: 8px;
-padding: 10px 16px;
-font-size: 0.9rem;
-cursor: pointer;
-font-family: inherit;
+.auth-error {
+	color: #c0392b;
+	font-size: 0.85rem;
+	margin-bottom: 10px;
+	text-align: left;
 }
 
-#reg-skip:hover { background: #f0f0f0; }
+.auth-error.hidden { display: none; }
+
+.auth-note {
+	font-size: 0.8rem;
+	color: #888;
+	margin-top: 10px;
+	line-height: 1.4;
+}
+
+/* ─── Token Modal (shown after registration) ─────────────────── */
+.token-modal-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.7);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 400;
+}
+
+.token-modal-box {
+	background: #fffbe6;
+	border: 3px solid var(--gold);
+	border-radius: 16px;
+	padding: 30px 32px;
+	max-width: 400px;
+	width: 92vw;
+	text-align: center;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+	font-family: 'Crimson Text', Georgia, serif;
+}
+
+.token-modal-icon {
+	font-size: 2.5rem;
+	margin-bottom: 8px;
+}
+
+.token-modal-box h3 {
+	margin: 0 0 8px;
+	color: var(--brown);
+	font-family: 'Cinzel Decorative', serif;
+	font-size: 1.1rem;
+}
+
+.token-modal-box p {
+	font-size: 0.9rem;
+	color: #555;
+	margin-bottom: 16px;
+}
+
+.token-display {
+	background: #fff;
+	border: 2px dashed var(--gold);
+	border-radius: 8px;
+	padding: 12px;
+	font-family: monospace;
+	font-size: 0.95rem;
+	color: #333;
+	word-break: break-all;
+	margin-bottom: 16px;
+	user-select: all;
+}
+
+.token-copy-btn {
+	background: transparent;
+	color: var(--brown);
+	border: 2px solid var(--gold);
+	border-radius: 8px;
+	padding: 8px 18px;
+	font-size: 0.9rem;
+	cursor: pointer;
+	margin-right: 8px;
+	font-family: inherit;
+}
+
+.token-copy-btn:hover { background: #fef3cc; }
+
+.token-continue-btn {
+	background: var(--gold);
+	color: #fff;
+	border: none;
+	border-radius: 8px;
+	padding: 10px 22px;
+	font-size: 1rem;
+	cursor: pointer;
+	font-family: 'Cinzel Decorative', serif;
+}
+
+.token-continue-btn:hover { background: #c86b00; }
+
+/* ─── Loading Screen ─────────────────────────────────────────── */
+#loading-screen {
+	position: fixed;
+	inset: 0;
+	background-image: url('../assets/images/bg.png');
+	background-position: center;
+	background-size: cover;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 200;
+}
+
+#loading-box {
+	background: rgba(255, 248, 220, 0.95);
+	border: 3px solid var(--gold);
+	border-radius: 18px;
+	padding: 36px 48px;
+	text-align: center;
+	box-shadow: 0 12px 48px rgba(0, 0, 0, 0.55);
+	min-width: 280px;
+}
+
+#loading-egg {
+	width: 80px;
+	height: 80px;
+	margin: 0 auto 16px;
+	background-image: url('../assets/images/artslab_sprite_collection.png');
+	background-size: 400% 400%;
+	background-position: 33.33% 0%;
+	animation: eggPulse 1.2s ease-in-out infinite;
+	border-radius: 50% 50% 55% 55%;
+}
+
+@keyframes eggPulse {
+	0%, 100% { transform: scale(1); }
+	50% { transform: scale(1.08); }
+}
+
+#loading-text {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: 1rem;
+	color: var(--brown);
+	margin-bottom: 16px;
+}
+
+#loading-bar-outer {
+	width: 100%;
+	height: 12px;
+	background: rgba(0, 0, 0, 0.15);
+	border-radius: 20px;
+	border: 1.5px solid var(--gold);
+	overflow: hidden;
+}
+
+#loading-bar-fill {
+	height: 100%;
+	width: 0%;
+	background: linear-gradient(to right, #f07800, var(--gold), var(--gold-light));
+	border-radius: 20px;
+	transition: width 0.3s ease;
+	box-shadow: 0 0 6px rgba(240, 165, 0, 0.6);
+}
+

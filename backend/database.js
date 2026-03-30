@@ -52,6 +52,24 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS idx_scores_score ON scores(score DESC);
   CREATE INDEX IF NOT EXISTS idx_scores_player ON scores(player_id);
+
+  CREATE TABLE IF NOT EXISTS game_progress (
+    player_id TEXT PRIMARY KEY REFERENCES players(id),
+    state_json TEXT NOT NULL DEFAULT '{}',
+    updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS level1_progress (
+    player_id TEXT PRIMARY KEY REFERENCES players(id),
+    state_json TEXT NOT NULL DEFAULT '{}',
+    updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS plant_progress (
+    player_id TEXT PRIMARY KEY REFERENCES players(id),
+    state_json TEXT NOT NULL DEFAULT '[]',
+    updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+  );
 `);
 
 module.exports = db;

@@ -10,7 +10,49 @@
 
 <body>
 
-	<div id="game-wrapper">
+	<!-- ── AUTH SCREEN ────────────────────────────────────────── -->
+	<div id="auth-screen">
+		<div id="auth-box">
+			<div id="auth-icon">🥚</div>
+			<h1 id="auth-title">Koel's New Year<br>Egg Adventure</h1>
+
+			<div id="auth-tabs">
+				<button id="tab-login" class="auth-tab active">Login</button>
+				<button id="tab-register" class="auth-tab">Register</button>
+			</div>
+
+			<!-- Login form -->
+			<div id="login-form">
+				<input type="text" id="login-username" maxlength="30" placeholder="Player name" autocomplete="off" />
+				<input type="text" id="login-token" maxlength="36" placeholder="Your secret token" autocomplete="off" />
+				<div id="login-error" class="auth-error hidden"></div>
+				<button id="login-submit" class="auth-btn">Login</button>
+			</div>
+
+			<!-- Register form -->
+			<div id="register-form" class="hidden">
+				<input type="text" id="reg-username" maxlength="30" placeholder="Choose a player name" autocomplete="off" />
+				<input type="email" id="reg-email" maxlength="100" placeholder="Email (optional)" autocomplete="off" />
+				<div id="register-error" class="auth-error hidden"></div>
+				<button id="register-submit" class="auth-btn">Register</button>
+				<p class="auth-note">After registering, save your token — you'll need it to log back in!</p>
+			</div>
+		</div>
+	</div>
+
+	<!-- ── LOADING SCREEN ─────────────────────────────────────── -->
+	<div id="loading-screen" class="hidden">
+		<div id="loading-box">
+			<div id="loading-egg"></div>
+			<div id="loading-text">Loading adventure…</div>
+			<div id="loading-bar-outer">
+				<div id="loading-bar-fill"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- ── GAME ───────────────────────────────────────────────── -->
+	<div id="game-wrapper" class="hidden">
 
 		<!-- ── LEVEL 1: MAP EXPLORATION SCREEN ────────────────────── -->
 		<div id="level1-screen" class="hidden">
@@ -140,7 +182,6 @@
 			<span id="debug-info"></span>
 		</div>
 
-	</div><!-- /game-container -->
 	</div><!-- /game-wrapper -->
 
 	<script type="module" src="src/main.js"></script>
