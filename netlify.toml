@@ -1,0 +1,24 @@
+# Netlify configuration for Avu Bitharay frontend
+# Deploys the Vite-built site and proxies API requests to the backend
+
+[build]
+  # Build the Vite bundle, then copy runtime-referenced assets (audio, images)
+  # into dist so they are available at the paths used in the game code.
+  command   = "npm run build && cp -r assets/audio dist/assets/audio && cp -r assets/images dist/assets/images"
+  publish   = "dist"
+
+# Proxy /api/* to the backend (avoids CORS issues from same-origin requests)
+[[redirects]]
+  from   = "/api/*"
+  to     = "https://api.avurudhu.artslabcreatives.com/api/:splat"
+  status = 200
+  force  = true
+
+# SPA fallback — send all unmatched routes to index.html
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+[build.environment]
+  NODE_VERSION = "22"
