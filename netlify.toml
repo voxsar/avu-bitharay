@@ -1,0 +1,22 @@
+# Netlify configuration for Avu Bitharay frontend
+# Deploys the Vite-built site and proxies API requests to the backend
+
+[build]
+  command   = "npm run build"
+  publish   = "dist"
+
+# Proxy /api/* to the backend (avoids CORS issues from same-origin requests)
+[[redirects]]
+  from   = "/api/*"
+  to     = "https://api.avurudhu.artslabcreatives.com/api/:splat"
+  status = 200
+  force  = true
+
+# SPA fallback — send all unmatched routes to index.html
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+[build.environment]
+  NODE_VERSION = "22"
