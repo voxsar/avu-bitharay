@@ -2,9 +2,9 @@
 # Deploys the Vite-built site and proxies API requests to the backend
 
 [build]
-  # Build the Vite bundle, then copy runtime-referenced assets (audio, images)
-  # into dist so they are available at the paths used in the game code.
-  command   = "npm run build && cp -r assets/audio dist/assets/audio && cp -r assets/images dist/assets/images"
+  # Build the Vite bundle, then copy runtime-referenced images into dist.
+  # Audio files are handled automatically by Vite via publicDir: 'public'.
+  command   = "npm run build && cp -r assets/images dist/assets/images"
   publish   = "dist"
 
 # Proxy /api/* to the backend (avoids CORS issues from same-origin requests)
