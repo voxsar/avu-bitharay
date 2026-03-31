@@ -4,7 +4,7 @@
  * Console commands for testing Level 1 functionality
  */
 
-import { loadLevel1State, saveLevel1State } from './level1.js';
+import { loadLevel1State, saveLevel1State, setLevel1StateCache } from './level1.js';
 import { loadState, saveState } from './main.js';
 
 // ─── Debug Commands ───────────────────────────────────────────
@@ -35,7 +35,7 @@ window.debugCompleteLevel1 = function () {
  * Reset Level 1 completely
  */
 window.debugResetLevel1 = function () {
-	localStorage.removeItem('avurudhu_bithara_level1_v1');
+	setLevel1StateCache(null); // Reset level1 cache to default state
 
 	const mainState = loadState();
 	mainState.currentLevel = 1;

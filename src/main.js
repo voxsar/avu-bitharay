@@ -18,13 +18,12 @@
 import { initPlantUI } from './plantsUI.js';
 import './plantDebug.js'; // Debug helpers for testing plants
 import { plantInPot } from './plantDebug.js';
-import { initLevel1 } from './level1.js';
+import { initLevel1, setLevel1StateCache } from './level1.js';
 import './level1Debug.js'; // Debug helpers for Level 1
-import { getLocalPlayer, submitScore, computeScore } from './api.js';
+import { getLocalPlayer, loginPlayer, registerPlayer, loadAllProgress, saveGameProgress, submitScore, computeScore } from './api.js';
+import { setPlantStateCache } from './plants.js';
 
 // ─── Constants ────────────────────────────────────────────────
-const STORAGE_KEY = 'avurudhu_bithara_v1';
-const LEVEL1_STORAGE_KEY = 'avurudhu_bithara_level1_v1';
 const TOTAL_DAYS = 14;
 const ACTIONS = ['water', 'sing', 'feed', 'protect'];
 
@@ -38,6 +37,10 @@ const HEALTH_DELTA = {
 };
 
 // ─── State helpers ────────────────────────────────────────────
+
+// Module-level game state cache — loaded from the database on startup.
+let _gameState = null;
+
 function todayISO() {
 	return new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
 }
@@ -66,17 +69,15 @@ function makeDefaultState() {
 }
 
 function loadState() {
-	try {
-		const raw = localStorage.getItem(STORAGE_KEY);
-		if (!raw) return makeDefaultState();
-		return { ...makeDefaultState(), ...JSON.parse(raw) };
-	} catch {
-		return makeDefaultState();
+	if (!_gameState) {
+		_gameState = makeDefaultState();
 	}
+	return _gameState;
 }
 
 function saveState(state) {
-	localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+	_gameState = state;
+	saveGameProgress(state);
 }
 
 // ─── Day advancement logic ────────────────────────────────────
@@ -484,6 +485,10 @@ function generateDailyPlantCoins(state) {
 
 // ─── Init ─────────────────────────────────────────────────────
 function init() {
+	// Reveal game wrapper now that auth + loading are complete
+	const gameWrapper = $('game-wrapper');
+	if (gameWrapper) gameWrapper.classList.remove('hidden');
+
 	let state = loadState();
 	const today = todayISO();
 
@@ -599,9 +604,6 @@ function init() {
 
 	// ── Witch antagonist events ──
 	startWitchSystem();
-
-	// ── Player registration prompt ──
-	maybeShowRegistrationPrompt();
 }
 
 // ─── Coin Animation System ────────────────────────────────────
@@ -905,79 +907,170 @@ function hideWitch(el) {
 	}, 600);
 }
 
-// ─── Player Registration UI ───────────────────────────────────
+// ─── Auth & Loading flow ──────────────────────────────────────
 /**
- * Shows a lightweight registration prompt if the player has not yet
- * registered. Scores are still saved locally when not registered;
- * registration just allows the player to appear on the leaderboard.
+ * Entry point: show the auth screen, or skip straight to the loader
+ * if the player already has saved credentials.
  */
-function maybeShowRegistrationPrompt() {
-	if (getLocalPlayer()) return; // Already registered
-
-	// Only show after a short delay so it doesn't feel intrusive
-	setTimeout(() => {
-		showRegistrationModal();
-	}, 3000);
+function initAuth() {
+	const player = getLocalPlayer();
+	if (player) {
+		startLoader();
+		return;
+	}
+	showAuthScreen();
 }
 
-function showRegistrationModal() {
-	// Don't stack on top of existing modals
-	if (!$('message-overlay').classList.contains('hidden')) return;
+function showAuthScreen() {
+	const screen = $('auth-screen');
+	if (screen) screen.classList.remove('hidden');
 
-	const overlay = document.createElement('div');
-	overlay.id = 'registration-overlay';
-	overlay.innerHTML = `
-		<div id="registration-box">
-			<div id="registration-icon">🏆</div>
-			<h3>Join the Leaderboard!</h3>
-			<p>Register a name to save your score online and compete with others.</p>
-			<input type="text" id="reg-username" maxlength="30" placeholder="Your player name…" autocomplete="off" />
-			<input type="email" id="reg-email" maxlength="100" placeholder="Email (optional)" autocomplete="off" />
-			<div id="reg-error" class="reg-error hidden"></div>
-			<div id="reg-buttons">
-				<button id="reg-submit">Register</button>
-				<button id="reg-skip">Play as Guest</button>
-			</div>
-		</div>
-	`;
-	document.body.appendChild(overlay);
+	const tabLogin = $('tab-login');
+	const tabRegister = $('tab-register');
+	const loginForm = $('login-form');
+	const registerForm = $('register-form');
 
-	const usernameEl = overlay.querySelector('#reg-username');
-	const emailEl = overlay.querySelector('#reg-email');
-	const errorEl = overlay.querySelector('#reg-error');
-	const submitBtn = overlay.querySelector('#reg-submit');
-	const skipBtn = overlay.querySelector('#reg-skip');
-
-	usernameEl.focus();
-
-	submitBtn.addEventListener('click', async () => {
-		const username = usernameEl.value.trim();
-		if (!username || username.length < 2) {
-			errorEl.textContent = 'Please enter a name with at least 2 characters.';
-			errorEl.classList.remove('hidden');
-			return;
-		}
-
-		submitBtn.disabled = true;
-		submitBtn.textContent = 'Registering…';
-		errorEl.classList.add('hidden');
-
-		try {
-			const { registerPlayer } = await import('./api.js');
-			await registerPlayer(username, emailEl.value.trim());
-			overlay.remove();
-		} catch (err) {
-			errorEl.textContent = err.message || 'Registration failed. Try a different name.';
-			errorEl.classList.remove('hidden');
-			submitBtn.disabled = false;
-			submitBtn.textContent = 'Register';
-		}
+	// Tab switching
+	tabLogin.addEventListener('click', () => {
+		tabLogin.classList.add('active');
+		tabRegister.classList.remove('active');
+		loginForm.classList.remove('hidden');
+		registerForm.classList.add('hidden');
+	});
+	tabRegister.addEventListener('click', () => {
+		tabRegister.classList.add('active');
+		tabLogin.classList.remove('active');
+		registerForm.classList.remove('hidden');
+		loginForm.classList.add('hidden');
 	});
 
-	skipBtn.addEventListener('click', () => overlay.remove());
+	// Login submit
+	const loginBtn = $('login-submit');
+	const loginError = $('login-error');
+	loginBtn.addEventListener('click', async () => {
+		const username = $('login-username').value.trim();
+		const password = $('login-password').value;
+		if (!username || !password) {
+			loginError.textContent = 'Please enter your player name and password.';
+			loginError.classList.remove('hidden');
+			return;
+		}
+		loginBtn.disabled = true;
+		loginBtn.textContent = 'Logging in…';
+		loginError.classList.add('hidden');
+		try {
+			await loginPlayer(username, password);
+			screen.classList.add('hidden');
+			startLoader();
+		} catch (err) {
+			loginError.textContent = err.message || 'Login failed. Check your name and password.';
+			loginError.classList.remove('hidden');
+			loginBtn.disabled = false;
+			loginBtn.textContent = 'Login';
+		}
+	});
+	$('login-username').addEventListener('keydown', e => { if (e.key === 'Enter') loginBtn.click(); });
+	$('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') loginBtn.click(); });
 
-	// Allow Enter key to submit
-	usernameEl.addEventListener('keydown', e => { if (e.key === 'Enter') submitBtn.click(); });
+	// Register submit
+	const regBtn = $('register-submit');
+	const regError = $('register-error');
+	regBtn.addEventListener('click', async () => {
+		const username = $('reg-username').value.trim();
+		const password = $('reg-password').value;
+		const email = $('reg-email').value.trim();
+		if (!username || username.length < 2) {
+			regError.textContent = 'Please enter a name with at least 2 characters.';
+			regError.classList.remove('hidden');
+			return;
+		}
+		if (!password || password.length < 6) {
+			regError.textContent = 'Password must be at least 6 characters.';
+			regError.classList.remove('hidden');
+			return;
+		}
+		regBtn.disabled = true;
+		regBtn.textContent = 'Registering…';
+		regError.classList.add('hidden');
+		try {
+			await registerPlayer(username, password, email);
+			screen.classList.add('hidden');
+			startLoader();
+		} catch (err) {
+			regError.textContent = err.message || 'Registration failed. Try a different name.';
+			regError.classList.remove('hidden');
+			regBtn.disabled = false;
+			regBtn.textContent = 'Register';
+		}
+	});
+	$('reg-username').addEventListener('keydown', e => { if (e.key === 'Enter') regBtn.click(); });
+	$('reg-password').addEventListener('keydown', e => { if (e.key === 'Enter') regBtn.click(); });
+}
+
+/**
+ * Show the loading screen, preload all assets and DB progress in parallel,
+ * then hide the loader and start the game.
+ */
+async function startLoader() {
+	const loadingScreen = $('loading-screen');
+	if (loadingScreen) loadingScreen.classList.remove('hidden');
+
+	const imageAssets = [
+		'assets/images/artslab_sprite_collection.png',
+		'assets/images/bg.png',
+		'assets/images/bg3.png',
+		'assets/images/super_bg.png',
+		'assets/images/crow_sprite.png',
+		'assets/images/side_annoucement_panel.png',
+		'assets/images/bottom_panel.png',
+		'assets/images/tools.png',
+		'assets/images/coin.png',
+		'assets/images/coin_red.png',
+		'assets/images/coin_silver.png',
+		'assets/images/drum.png',
+		'assets/images/watering.png',
+		'assets/images/pot.png',
+		'assets/images/bird_nest_pot.png',
+		'assets/images/interface-collection_0000_roses.png',
+		'assets/images/interface-collection_0002_maigolds.png',
+		'assets/images/interface-collection_0003_sunflowers.png',
+		'assets/images/interface-collection_0005_daafo.png',
+		'assets/images/narrator_open.png',
+		'assets/images/narrator_closed.png',
+	];
+
+	let loaded = 0;
+	const total = imageAssets.length;
+
+	function updateLoadingBar(n) {
+		const fill = $('loading-bar-fill');
+		if (fill) fill.style.width = `${Math.round((n / total) * 100)}%`;
+		const text = $('loading-text');
+		if (text) text.textContent = `Loading… ${Math.round((n / total) * 100)}%`;
+	}
+
+	// Preload images + load DB progress in parallel
+	const [progress] = await Promise.all([
+		loadAllProgress(),
+		Promise.all(
+			imageAssets.map(src => new Promise(resolve => {
+				const img = new Image();
+				img.onload = img.onerror = () => { loaded++; updateLoadingBar(loaded); resolve(); };
+				img.src = src;
+			}))
+		),
+	]);
+
+	// Populate module-level state caches with DB data
+	_gameState = progress.game
+		? { ...makeDefaultState(), ...progress.game }
+		: makeDefaultState();
+	setLevel1StateCache(progress.level1);
+	setPlantStateCache(progress.plants);
+
+	// Hide loader, show game
+	if (loadingScreen) loadingScreen.classList.add('hidden');
+	init();
 }
 
 // ─── Watering Can System ──────────────────────────────────
@@ -1345,7 +1438,7 @@ function startCrowSystem() {
 }
 
 // ─── Start ────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', initAuth);
 
 // ─── Exports for Level 1 ──────────────────────────────────────
 export { switchLevel, saveState, loadState, showMessage, spawnCoin };

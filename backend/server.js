@@ -9,6 +9,7 @@ const helmet = require('helmet');
 // Import routes (also initialises the DB schema on first load)
 const playersRouter = require('./routes/players');
 const scoresRouter = require('./routes/scores');
+const progressRouter = require('./routes/progress');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -36,6 +37,7 @@ app.use(cors({
 // ─── Routes ───────────────────────────────────────────────────
 app.use('/api/players', playersRouter);
 app.use('/api/scores', scoresRouter);
+app.use('/api/progress', progressRouter);
 
 // ─── Health check ─────────────────────────────────────────────
 app.get('/health', (_req, res) => {

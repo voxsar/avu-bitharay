@@ -12,3 +12,4 @@ backend/.env
 # OS
 .DS_Store
 Thumbs.db
+dist/
