@@ -1,20 +1,27 @@
 /**
- * Players routes — registration and profile
- * POST /api/players/register  – create a new player
- * GET  /api/players/:id       – get player info (token required)
+ * Players routes — registration, login, and profile
+ * POST /api/players/register  – create a new player (password → bcrypt hash)
+ * POST /api/players/login     – verify password, return signed JWT
+ * GET  /api/players/:id       – get player info (JWT required)
  */
 
 'use strict';
 
 const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../database');
 
 const router = express.Router();
 
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+const JWT_EXPIRY = '1y'; // 1-year expiry as requested
+const BCRYPT_ROUNDS = 10;
+
 // ─── POST /api/players/register ───────────────────────────────
-router.post('/register', (req, res) => {
-	const { username, email } = req.body || {};
+router.post('/register', async (req, res) => {
+	const { username, password, email } = req.body || {};
 
 	if (!username || typeof username !== 'string') {
 		return res.status(400).json({ error: 'username is required' });
@@ -27,6 +34,10 @@ router.post('/register', (req, res) => {
 		});
 	}
 
+	if (!password || typeof password !== 'string' || password.length < 6) {
+		return res.status(400).json({ error: 'password must be at least 6 characters' });
+	}
+
 	// Validate optional email
 	if (email && typeof email === 'string' && email.length > 0) {
 		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -34,21 +45,17 @@ router.post('/register', (req, res) => {
 		}
 	}
 
-	const id = uuidv4();
-	const token = uuidv4();
-
 	try {
-		const insert = db.prepare(
-			'INSERT INTO players (id, username, email, token) VALUES (?, ?, ?, ?)'
-		);
-		insert.run(id, trimmed, email?.trim() || null, token);
+		const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+		const id = uuidv4();
 
-		return res.status(201).json({
-			playerId: id,
-			username: trimmed,
-			token,
-			message: 'Player registered successfully. Keep your token safe — it authenticates future requests.'
-		});
+		db.prepare(
+			'INSERT INTO players (id, username, email, password_hash) VALUES (?, ?, ?, ?)'
+		).run(id, trimmed, email?.trim() || null, passwordHash);
+
+		const token = jwt.sign({ sub: id, username: trimmed }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+
+		return res.status(201).json({ playerId: id, username: trimmed, token });
 	} catch (err) {
 		if (err.message && err.message.includes('UNIQUE')) {
 			return res.status(409).json({ error: 'Username is already taken' });
@@ -59,35 +66,42 @@ router.post('/register', (req, res) => {
 });
 
 // ─── POST /api/players/login ──────────────────────────────────
-router.post('/login', (req, res) => {
-	const { username, token } = req.body || {};
+router.post('/login', async (req, res) => {
+	const { username, password } = req.body || {};
 
-	if (!username || typeof username !== 'string' || !token || typeof token !== 'string') {
-		return res.status(400).json({ error: 'username and token are required' });
+	if (!username || typeof username !== 'string' || !password || typeof password !== 'string') {
+		return res.status(400).json({ error: 'username and password are required' });
 	}
 
 	const player = db.prepare(
-		'SELECT id, username, email FROM players WHERE username = ? AND token = ?'
-	).get(username.trim(), token.trim());
+		'SELECT id, username, password_hash FROM players WHERE username = ?'
+	).get(username.trim());
 
 	if (!player) {
-		return res.status(401).json({ error: 'Invalid username or token' });
+		return res.status(401).json({ error: 'Invalid username or password' });
 	}
 
-	return res.json({ playerId: player.id, username: player.username, token: token.trim() });
+	const match = await bcrypt.compare(password, player.password_hash);
+	if (!match) {
+		return res.status(401).json({ error: 'Invalid username or password' });
+	}
+
+	const token = jwt.sign({ sub: player.id, username: player.username }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+
+	return res.json({ playerId: player.id, username: player.username, token });
 });
 
 // ─── GET /api/players/:id ─────────────────────────────────────
 router.get('/:id', (req, res) => {
-	const token = extractToken(req);
-	if (!token) return res.status(401).json({ error: 'Authorization token required' });
+	const payload = verifyJWT(req);
+	if (!payload) return res.status(401).json({ error: 'Valid JWT required' });
+	if (String(payload.sub) !== String(req.params.id)) return res.status(403).json({ error: 'Forbidden' });
 
-	const player = db.prepare('SELECT id, username, email, created_at FROM players WHERE id = ? AND token = ?')
-		.get(req.params.id, token);
+	const player = db.prepare('SELECT id, username, email, created_at FROM players WHERE id = ?')
+		.get(req.params.id);
 
-	if (!player) return res.status(404).json({ error: 'Player not found or token invalid' });
+	if (!player) return res.status(404).json({ error: 'Player not found' });
 
-	// Best score for this player
 	const best = db.prepare('SELECT MAX(score) as best FROM scores WHERE player_id = ?')
 		.get(req.params.id);
 
@@ -95,10 +109,16 @@ router.get('/:id', (req, res) => {
 });
 
 // ─── Helper ───────────────────────────────────────────────────
-function extractToken(req) {
+function verifyJWT(req) {
 	const auth = req.headers.authorization || '';
-	if (auth.startsWith('Bearer ')) return auth.slice(7).trim();
-	return null;
+	const raw = auth.startsWith('Bearer ') ? auth.slice(7).trim() : null;
+	if (!raw) return null;
+	try {
+		return jwt.verify(raw, JWT_SECRET);
+	} catch {
+		return null;
+	}
 }
 
 module.exports = router;
+module.exports.verifyJWT = verifyJWT;

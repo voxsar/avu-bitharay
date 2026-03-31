@@ -23,19 +23,19 @@
 
 			<!-- Login form -->
 			<div id="login-form">
-				<input type="text" id="login-username" maxlength="30" placeholder="Player name" autocomplete="off" />
-				<input type="text" id="login-token" maxlength="36" placeholder="Your secret token" autocomplete="off" />
+				<input type="text" id="login-username" maxlength="30" placeholder="Player name" autocomplete="username" />
+				<input type="password" id="login-password" maxlength="128" placeholder="Password" autocomplete="current-password" />
 				<div id="login-error" class="auth-error hidden"></div>
 				<button id="login-submit" class="auth-btn">Login</button>
 			</div>
 
 			<!-- Register form -->
 			<div id="register-form" class="hidden">
-				<input type="text" id="reg-username" maxlength="30" placeholder="Choose a player name" autocomplete="off" />
-				<input type="email" id="reg-email" maxlength="100" placeholder="Email (optional)" autocomplete="off" />
+				<input type="text" id="reg-username" maxlength="30" placeholder="Choose a player name" autocomplete="username" />
+				<input type="password" id="reg-password" maxlength="128" placeholder="Choose a password (min. 6 chars)" autocomplete="new-password" />
+				<input type="email" id="reg-email" maxlength="100" placeholder="Email (optional)" autocomplete="email" />
 				<div id="register-error" class="auth-error hidden"></div>
 				<button id="register-submit" class="auth-btn">Register</button>
-				<p class="auth-note">After registering, save your token — you'll need it to log back in!</p>
 			</div>
 		</div>
 	</div>

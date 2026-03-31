@@ -9,10 +9,10 @@ const API_BASE =
 		? 'http://localhost:3000/api'
 		: '/api';
 
-// Only the player key (token) is stored in localStorage — all game progress is in the DB.
+// Only the JWT (and player info) is stored in localStorage — all game progress is in the DB.
 const PLAYER_KEY = 'avurudhu_player_v1';
 
-// ─── Local player persistence (token only) ────────────────────
+// ─── Local player persistence (JWT only) ─────────────────────
 export function getLocalPlayer() {
 	try {
 		const raw = localStorage.getItem(PLAYER_KEY);
@@ -23,26 +23,25 @@ export function getLocalPlayer() {
 }
 
 function saveLocalPlayer(player) {
-	// Only persist the minimal credentials needed for authentication
 	localStorage.setItem(PLAYER_KEY, JSON.stringify({
 		playerId: player.playerId,
 		username: player.username,
-		token: player.token,
+		token: player.token,  // JWT
 	}));
 }
 
 // ─── Player login ─────────────────────────────────────────────
 /**
- * Log in with an existing username + token pair.
+ * Log in with username + password. Returns a signed JWT stored in localStorage.
  * @param {string} username
- * @param {string} token
+ * @param {string} password
  * @returns {Promise<{playerId, username, token}>}
  */
-export async function loginPlayer(username, token) {
+export async function loginPlayer(username, password) {
 	const res = await fetch(`${API_BASE}/players/login`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ username, token }),
+		body: JSON.stringify({ username, password }),
 	});
 
 	const data = await res.json();
@@ -54,23 +53,22 @@ export async function loginPlayer(username, token) {
 
 // ─── Player registration ──────────────────────────────────────
 /**
- * Register a new player with the backend.
+ * Register a new player. Password is hashed on the server.
+ * Returns a signed JWT stored in localStorage.
  * @param {string} username
+ * @param {string} password
  * @param {string} [email]
  * @returns {Promise<{playerId, username, token}>}
  */
-export async function registerPlayer(username, email = '') {
+export async function registerPlayer(username, password, email = '') {
 	const res = await fetch(`${API_BASE}/players/register`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ username, email: email || undefined }),
+		body: JSON.stringify({ username, password, email: email || undefined }),
 	});
 
 	const data = await res.json();
-
-	if (!res.ok) {
-		throw new Error(data.error || 'Registration failed');
-	}
+	if (!res.ok) throw new Error(data.error || 'Registration failed');
 
 	saveLocalPlayer({ playerId: data.playerId, username: data.username, token: data.token });
 	return data;

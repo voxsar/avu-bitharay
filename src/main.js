@@ -949,9 +949,9 @@ function showAuthScreen() {
 	const loginError = $('login-error');
 	loginBtn.addEventListener('click', async () => {
 		const username = $('login-username').value.trim();
-		const token = $('login-token').value.trim();
-		if (!username || !token) {
-			loginError.textContent = 'Please enter your player name and token.';
+		const password = $('login-password').value;
+		if (!username || !password) {
+			loginError.textContent = 'Please enter your player name and password.';
 			loginError.classList.remove('hidden');
 			return;
 		}
@@ -959,27 +959,33 @@ function showAuthScreen() {
 		loginBtn.textContent = 'Logging in…';
 		loginError.classList.add('hidden');
 		try {
-			await loginPlayer(username, token);
+			await loginPlayer(username, password);
 			screen.classList.add('hidden');
 			startLoader();
 		} catch (err) {
-			loginError.textContent = err.message || 'Login failed. Check your name and token.';
+			loginError.textContent = err.message || 'Login failed. Check your name and password.';
 			loginError.classList.remove('hidden');
 			loginBtn.disabled = false;
 			loginBtn.textContent = 'Login';
 		}
 	});
 	$('login-username').addEventListener('keydown', e => { if (e.key === 'Enter') loginBtn.click(); });
-	$('login-token').addEventListener('keydown', e => { if (e.key === 'Enter') loginBtn.click(); });
+	$('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') loginBtn.click(); });
 
 	// Register submit
 	const regBtn = $('register-submit');
 	const regError = $('register-error');
 	regBtn.addEventListener('click', async () => {
 		const username = $('reg-username').value.trim();
+		const password = $('reg-password').value;
 		const email = $('reg-email').value.trim();
 		if (!username || username.length < 2) {
 			regError.textContent = 'Please enter a name with at least 2 characters.';
+			regError.classList.remove('hidden');
+			return;
+		}
+		if (!password || password.length < 6) {
+			regError.textContent = 'Password must be at least 6 characters.';
 			regError.classList.remove('hidden');
 			return;
 		}
@@ -987,12 +993,9 @@ function showAuthScreen() {
 		regBtn.textContent = 'Registering…';
 		regError.classList.add('hidden');
 		try {
-			const data = await registerPlayer(username, email);
-			// Show the generated token so the player can save it
-			showTokenModal(data.token, () => {
-				screen.classList.add('hidden');
-				startLoader();
-			});
+			await registerPlayer(username, password, email);
+			screen.classList.add('hidden');
+			startLoader();
 		} catch (err) {
 			regError.textContent = err.message || 'Registration failed. Try a different name.';
 			regError.classList.remove('hidden');
@@ -1001,35 +1004,7 @@ function showAuthScreen() {
 		}
 	});
 	$('reg-username').addEventListener('keydown', e => { if (e.key === 'Enter') regBtn.click(); });
-}
-
-/**
- * Show the generated token to the player after registration.
- * They MUST save it — it's their only way to log back in.
- */
-function showTokenModal(token, onContinue) {
-	const modal = document.createElement('div');
-	modal.className = 'token-modal-overlay';
-	modal.innerHTML = `
-		<div class="token-modal-box">
-			<div class="token-modal-icon">🔑</div>
-			<h3>Your Secret Token</h3>
-			<p>Save this token — you'll need it to log in next time!</p>
-			<div class="token-display">${token}</div>
-			<button class="token-copy-btn" id="copy-token-btn">Copy Token</button>
-			<button class="token-continue-btn" id="continue-btn">Start Adventure →</button>
-		</div>
-	`;
-	document.body.appendChild(modal);
-
-	modal.querySelector('#copy-token-btn').addEventListener('click', () => {
-		navigator.clipboard?.writeText(token).catch(() => {});
-		modal.querySelector('#copy-token-btn').textContent = 'Copied!';
-	});
-	modal.querySelector('#continue-btn').addEventListener('click', () => {
-		modal.remove();
-		onContinue();
-	});
+	$('reg-password').addEventListener('keydown', e => { if (e.key === 'Enter') regBtn.click(); });
 }
 
 /**

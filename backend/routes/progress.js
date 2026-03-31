@@ -10,19 +10,15 @@
 
 const express = require('express');
 const db = require('../database');
+const { verifyJWT } = require('./players');
 
 const router = express.Router();
 
 // ─── Auth middleware ──────────────────────────────────────────
 function requirePlayer(req, res, next) {
-	const auth = req.headers.authorization || '';
-	const token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : null;
-	if (!token) return res.status(401).json({ error: 'Authorization token required' });
-
-	const player = db.prepare('SELECT id FROM players WHERE token = ?').get(token);
-	if (!player) return res.status(401).json({ error: 'Invalid token' });
-
-	req.playerId = player.id;
+	const payload = verifyJWT(req);
+	if (!payload) return res.status(401).json({ error: 'Valid JWT required' });
+	req.playerId = payload.sub;
 	next();
 }
 
