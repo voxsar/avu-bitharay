@@ -790,8 +790,13 @@ function showNilameAyya() {
 
 	nilameVisible = true;
 
-	// Play nilame sound
-	const audio = new Audio('assets/audio/nilame.ogg');
+	// Play nilame sound - try mp3 first (better browser support), fallback to ogg
+	const audio = new Audio('assets/audio/nilame.mp3');
+	audio.addEventListener('error', () => {
+		// If mp3 fails, try ogg
+		const audioFallback = new Audio('assets/audio/nilame.ogg');
+		audioFallback.play().catch(err => console.log('Nilame audio fallback failed:', err));
+	});
 	audio.play().catch(err => console.log('Nilame audio play failed:', err));
 
 	// Create character element
@@ -930,14 +935,27 @@ function showAuthScreen() {
 	const loginForm = $('login-form');
 	const registerForm = $('register-form');
 
+	// Safety check: ensure all elements exist
+	if (!tabLogin || !tabRegister || !loginForm || !registerForm) {
+		console.error('Auth screen elements not found:', {
+			tabLogin: !!tabLogin,
+			tabRegister: !!tabRegister,
+			loginForm: !!loginForm,
+			registerForm: !!registerForm
+		});
+		return;
+	}
+
 	// Tab switching
 	tabLogin.addEventListener('click', () => {
+		console.log('Login tab clicked');
 		tabLogin.classList.add('active');
 		tabRegister.classList.remove('active');
 		loginForm.classList.remove('hidden');
 		registerForm.classList.add('hidden');
 	});
 	tabRegister.addEventListener('click', () => {
+		console.log('Register tab clicked');
 		tabRegister.classList.add('active');
 		tabLogin.classList.remove('active');
 		registerForm.classList.remove('hidden');

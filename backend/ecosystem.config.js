@@ -26,17 +26,15 @@ module.exports = {
 			watch: false,
 			max_memory_restart: '200M',
 
-			// Environment variables (production)
+			// Use .env file for environment variables
+			env_file: '.env',
 			env: {
 				NODE_ENV: 'production',
-				PORT: 3000,
-				ALLOWED_ORIGINS: 'https://avurudhu.artslabcreatives.com',
-				DB_PATH: '/var/data/avu-bitharay/game.db',
 			},
 
 			// Log file locations (PM2 default: ~/.pm2/logs/)
-			out_file: '/var/log/avu-bitharay/api-out.log',
-			error_file: '/var/log/avu-bitharay/api-error.log',
+			out_file: './logs/api-out.log',
+			error_file: './logs/api-error.log',
 			log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
 		},
 	],

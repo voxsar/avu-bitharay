@@ -306,28 +306,16 @@ function checkLevel1Complete() {
 			🥚 Egg<br>
 			🌸 ${plants.length} Plant${plants.length > 1 ? 's' : ''}<br>
 			<br>
-			<button id="start-level2-btn" style="
-				background: linear-gradient(to bottom, #e8a820, #c98810);
-				color: #fff;
-				border: 2px solid #6b3a1f;
-				border-radius: 12px;
-				padding: 8px 24px;
-				font-family: 'Cinzel Decorative', serif;
-				font-size: 14px;
-				cursor: pointer;
-				margin-top: 12px;
-			">Start Your Adventure!</button>`,
-			() => {
-				const btn = document.getElementById('start-level2-btn');
-				if (btn) {
-					btn.addEventListener('click', () => {
-						switchLevel(mainState, 2);
-						document.getElementById('message-overlay').classList.add('hidden');
-						location.reload(); // Reload to initialize Level 2
-					});
-				}
-			}
+			<em>Starting your adventure...</em>`,
+			null
 		);
+
+		// Auto-transition to Level 2 after 3 seconds
+		setTimeout(() => {
+			switchLevel(mainState, 2);
+			document.getElementById('message-overlay').classList.add('hidden');
+			location.reload(); // Reload to initialize Level 2
+		}, 3000);
 
 		return true;
 	}
@@ -355,28 +343,16 @@ function checkLevel1Complete() {
 			${!egg ? '<em>No egg collected - this will make the game harder!</em><br>' : ''}
 			${plants.length < 2 ? '<em>Less than 2 plants - you\'ll earn fewer coins!</em><br>' : ''}
 			<br>
-			<button id="start-level2-btn" style="
-				background: linear-gradient(to bottom, #e8a820, #c98810);
-				color: #fff;
-				border: 2px solid #6b3a1f;
-				border-radius: 12px;
-				padding: 8px 24px;
-				font-family: 'Cinzel Decorative', serif;
-				font-size: 14px;
-				cursor: pointer;
-				margin-top: 12px;
-			">Continue Anyway</button>`,
-			() => {
-				const btn = document.getElementById('start-level2-btn');
-				if (btn) {
-					btn.addEventListener('click', () => {
-						switchLevel(mainState, 2);
-						document.getElementById('message-overlay').classList.add('hidden');
-						location.reload();
-					});
-				}
-			}
+			<em>Continuing to next level...</em>`,
+			null
 		);
+
+		// Auto-transition to Level 2 after 4 seconds (longer to read the warnings)
+		setTimeout(() => {
+			switchLevel(mainState, 2);
+			document.getElementById('message-overlay').classList.add('hidden');
+			location.reload();
+		}, 4000);
 
 		return true;
 	}
