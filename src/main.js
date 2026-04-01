@@ -1,17 +1,18 @@
 /**
- * KOEL'S NEW YEAR EGG ADVENTURE
+ * AVURUDHU BITHARA - EGG-CENTRIC GAME LOOP
  * ─────────────────────────────────────────────────────────────
- * Take care of an Asian Koel Egg over 14 real calendar days.
- * Complete 4 daily actions to keep the egg healthy.
- * Day 14 = hatch day (Sinhala & Tamil New Year, April 14).
+ * Core Loop: POI Mini-Games → Seeds → Daily Egg Care → Progression
+ *
+ * Game Flow:
+ * 1. Play POI mini-games to earn seeds (repeatable)
+ * 2. Use seeds for daily egg care actions
+ * 3. Complete all daily actions to progress to next day
+ * 4. Witch/Nilame dialogues create resource tension
+ * 5. Reach Day 14 with egg healthy = win
  *
  * Sprite sheet: artslab_sprite_collection.png
  *   1024×1024 px → 4 columns × 4 rows → each sprite 256×256 px
- *   Col 0 = neglected/cracked
- *   Col 1 = fair/normal
- *   Col 2 = good/glowing
- *   Col 3 = excellent/golden  (row 3 col 3 = hatched chick!)
- *   Row increases with game progress (days 1→14)
+ *   Columns reflect care quality, rows show progression
  */
 
 // ─── Imports ──────────────────────────────────────────────────
@@ -26,15 +27,20 @@ import { initDialogueState, getDialogueState } from './dialogue.js';
 
 // ─── Constants ────────────────────────────────────────────────
 const TOTAL_DAYS = 14;
-const ACTIONS = ['water', 'sing', 'feed', 'protect'];
 
-// Health changes per day based on completed actions
+// Daily action requirements
+const DAILY_REQUIREMENTS = {
+	seedsToPlant: 3,      // Must plant 3 seeds per day
+	wateringsNeeded: 9,   // 3 plants × 3 waterings each
+	drumsNeeded: 2,       // Play drums 2 times
+	crowRounds: 3         // Chase crows 3 rounds
+};
+
+// Health changes per day based on completion
 const HEALTH_DELTA = {
-	4: +5,   // all done  → improves
-	3: 0,   // 3/4 done  → stable
-	2: -8,   // 2/4 done  → slight drop
-	1: -15,  // 1/4 done  → noticeable drop
-	0: -20,  // none done → big drop (per missed day)
+	complete: +5,    // all actions done → improves
+	partial: -5,     // some actions done → slight drop
+	none: -15        // no actions done → big drop
 };
 
 // ─── State helpers ────────────────────────────────────────────
@@ -54,18 +60,41 @@ function daysBetween(isoA, isoB) {
 function makeDefaultState() {
 	const today = todayISO();
 	return {
-		currentLevel: 1,  // 1 = map exploration, 2 = egg caring
-		level1Complete: false,
-		collectedItems: { seeds: 0 }, // seeds from Level 1
+		// Core progression (unified loop - no levels)
 		startDate: today,
 		lastVisitDate: today,
 		currentDay: 1,
-		streak: 0,
-		eggHealth: 100,   // 0–100
-		dailyActions: { water: false, sing: false, feed: false, protect: false },
-		todayComplete: false,
+		totalDays: TOTAL_DAYS,
 		phase: 'playing',  // 'playing' | 'hatched' | 'gameover'
-		coins: { gold: 0, red: 0, silver: 0 },  // coin collection
+		streak: 0,
+
+		// Resource system (seeds are consumable)
+		seeds: 0,  // Current available seeds
+		seedsUsedToday: 0,  // Track daily consumption
+		totalSeedsEarned: 0,  // Lifetime stat
+		coins: { gold: 0, red: 0, silver: 0 },
+
+		// Egg state
+		eggHealth: 100,   // 0–100
+		eggGlowing: false,  // Visual feedback on completion
+
+		// Daily action tracking
+		dailyActions: {
+			plantsPlanted: 0,  // How many seeds planted today
+			plantsWatered: 0,  // Total waterings completed
+			drumsPlayed: 0,    // Drum interactions
+			crowsChased: 0     // Crow chase rounds
+		},
+		todayComplete: false,
+
+		// POI system (repeatable resource generation)
+		poisPlayedToday: 0,   // Track daily plays (optional limit)
+
+		// Witch interaction tracking
+		witchOfferedSeedsToday: false,
+		totalSeedsGivenToWitch: 0,
+
+		// Narrative state
 		dialogueState: null,  // Will be managed by dialogue.js
 	};
 }
@@ -97,15 +126,18 @@ function processNewDays(state) {
 	const daysMissed = daysBetween(state.lastVisitDate, today);
 
 	// Process the LAST recorded day first (was it completed?)
-	const lastDayActions = state.dailyActions;
-	const lastCompleted = ACTIONS.filter(a => lastDayActions[a]).length;
-	applyHealthDelta(state, lastCompleted);
-	if (lastCompleted === 4) state.streak++;
-	else if (lastCompleted < 3) state.streak = 0;
+	const wasComplete = state.todayComplete;
+	if (wasComplete) {
+		applyHealthDelta(state, 'complete');
+		state.streak++;
+	} else {
+		applyHealthDelta(state, 'none');
+		state.streak = 0;
+	}
 
 	// For any additional fully missed days (player was gone > 1 day)
 	for (let i = 1; i < daysMissed; i++) {
-		applyHealthDelta(state, 0);
+		applyHealthDelta(state, 'none');
 		state.streak = 0;
 		if (state.eggHealth <= 0) break;
 	}
@@ -114,8 +146,19 @@ function processNewDays(state) {
 	const newDay = Math.min(TOTAL_DAYS, state.currentDay + daysMissed);
 	state.currentDay = newDay;
 	state.lastVisitDate = today;
-	state.dailyActions = { water: false, sing: false, feed: false, protect: false };
+
+	// Reset daily state
+	state.dailyActions = {
+		plantsPlanted: 0,
+		plantsWatered: 0,
+		drumsPlayed: 0,
+		crowsChased: 0
+	};
+	state.seedsUsedToday = 0;
 	state.todayComplete = false;
+	state.eggGlowing = false;
+	state.poisPlayedToday = 0;
+	state.witchOfferedSeedsToday = false;
 
 	// Check terminal conditions
 	if (state.eggHealth <= 0) state.phase = 'gameover';
@@ -125,8 +168,8 @@ function processNewDays(state) {
 	return state;
 }
 
-function applyHealthDelta(state, completedCount) {
-	const delta = HEALTH_DELTA[completedCount] ?? HEALTH_DELTA[0];
+function applyHealthDelta(state, completionLevel) {
+	const delta = HEALTH_DELTA[completionLevel] ?? HEALTH_DELTA['none'];
 	state.eggHealth = Math.max(0, Math.min(100, state.eggHealth + delta));
 }
 
