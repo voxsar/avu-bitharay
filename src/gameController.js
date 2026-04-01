@@ -5,9 +5,6 @@
  */
 
 import { saveGameProgress } from './api.js';
-import { showMessage } from './main.js';
-import { showDialogue, findTriggeredNode, processChoice } from './dialogue.js';
-import { DIALOGUE_NODES } from './dialogueData.js';
 
 // Daily requirements
 export const DAILY_REQUIREMENTS = {

@@ -23,18 +23,16 @@ import { initLevel1, setLevel1StateCache } from './level1.js';
 import './level1Debug.js'; // Debug helpers for Level 1
 import { getLocalPlayer, loginPlayer, registerPlayer, loadAllProgress, saveGameProgress, submitScore, computeScore } from './api.js';
 import { setPlantStateCache } from './plants.js';
-import { initDialogueState, getDialogueState } from './dialogue.js';
+import { initDialogueState, getDialogueState, showDialogue, findTriggeredNode, processChoice } from './dialogue.js';
+import { DIALOGUE_NODES } from './dialogueData.js';
+import {
+	plantSeed, waterPlant, playDrums as gcPlayDrums, chaseCrows as gcChaseCrows,
+	completeDay, isDayComplete, getDailyProgress, shouldShowWitch, giveSeeds,
+	DAILY_REQUIREMENTS
+} from './gameController.js';
 
 // ─── Constants ────────────────────────────────────────────────
 const TOTAL_DAYS = 14;
-
-// Daily action requirements
-const DAILY_REQUIREMENTS = {
-	seedsToPlant: 3,      // Must plant 3 seeds per day
-	wateringsNeeded: 9,   // 3 plants × 3 waterings each
-	drumsNeeded: 2,       // Play drums 2 times
-	crowRounds: 3         // Chase crows 3 rounds
-};
 
 // Health changes per day based on completion
 const HEALTH_DELTA = {
@@ -246,21 +244,53 @@ function updateUI(state) {
 			? 'linear-gradient(to right, #f5a623, #f7c948)'
 			: 'linear-gradient(to right, #e53935, #f4511e)';
 
-	// Action buttons (if they exist)
-	for (const action of ACTIONS) {
-		const btn = $(`btn-${action}`);
-		if (!btn) continue;  // Skip if button doesn't exist
-		const done = state.dailyActions[action];
-		const countEl = btn.querySelector('.action-count');
+	// Seed counter
+	if ($('seed-count')) $('seed-count').textContent = state.seeds;
 
-		countEl.textContent = done ? '1/1 ✓' : '0/1';
-		btn.classList.toggle('done', done);
-		btn.disabled = done || state.phase !== 'playing';
+	// Daily action progress indicators
+	const actions = state.dailyActions;
+	if ($('plant-progress')) {
+		$('plant-progress').textContent = `${actions.plantsPlanted}/${DAILY_REQUIREMENTS.seedsToPlant}`;
+		$('action-plant').classList.toggle('done', actions.plantsPlanted >= DAILY_REQUIREMENTS.seedsToPlant);
+	}
+	if ($('water-progress')) {
+		$('water-progress').textContent = `${actions.plantsWatered}/${DAILY_REQUIREMENTS.wateringsNeeded}`;
+		$('action-water').classList.toggle('done', actions.plantsWatered >= DAILY_REQUIREMENTS.wateringsNeeded);
+	}
+	if ($('drums-progress')) {
+		$('drums-progress').textContent = `${actions.drumsPlayed}/${DAILY_REQUIREMENTS.drumsNeeded}`;
+		$('action-drums').classList.toggle('done', actions.drumsPlayed >= DAILY_REQUIREMENTS.drumsNeeded);
+	}
+	if ($('crows-progress')) {
+		$('crows-progress').textContent = `${actions.crowsChased}/${DAILY_REQUIREMENTS.crowRounds}`;
+		$('action-crows').classList.toggle('done', actions.crowsChased >= DAILY_REQUIREMENTS.crowRounds);
+	}
+
+	// Daily progress bar
+	const dailyPct = getDailyProgress(state);
+	if ($('daily-progress-bar-fill')) {
+		$('daily-progress-bar-fill').style.width = `${dailyPct}%`;
+	}
+	if ($('daily-progress-value')) {
+		$('daily-progress-value').textContent = `${dailyPct}%`;
+	}
+
+	// Complete Day button visibility
+	const completeDayBtn = $('complete-day-btn');
+	if (completeDayBtn) {
+		const canComplete = isDayComplete(state) && !state.todayComplete && state.phase === 'playing';
+		completeDayBtn.classList.toggle('hidden', !canComplete);
 	}
 
 	// Egg sprite
 	const { col, row } = getSpriteCoords(state.currentDay, state.eggHealth);
 	applySprite(col, row);
+
+	// Egg glow effect
+	const egg = $('egg-sprite');
+	if (egg) {
+		egg.classList.toggle('egg-glowing', !!state.eggGlowing);
+	}
 
 	// Coin counts
 	if ($('gold-count')) $('gold-count').textContent = state.coins.gold;
@@ -269,7 +299,7 @@ function updateUI(state) {
 
 	// Debug info
 	$('debug-info').textContent =
-		`Day ${state.currentDay} | HP ${state.eggHealth} | streak ${state.streak} | phase ${state.phase}`;
+		`Day ${state.currentDay} | HP ${state.eggHealth} | Seeds ${state.seeds} | streak ${state.streak} | phase ${state.phase}`;
 }
 
 // ─── Message overlay ──────────────────────────────────────────
@@ -287,64 +317,218 @@ function showMessage(icon, html, closeCb) {
 	closeBtn.addEventListener('click', handler);
 }
 
-// ─── Action handler ───────────────────────────────────────────
-function handleAction(state, action) {
-	if (state.dailyActions[action]) return;
+// ─── Daily Action Handlers (integrated with gameController) ───
+
+/**
+ * Handle planting a seed in a pot.
+ * Called when a pot is clicked and no plant exists in it.
+ */
+function handlePlantSeed(state, potIndex) {
 	if (state.phase !== 'playing') return;
 
-	// Mark action done
-	state.dailyActions[action] = true;
+	const result = plantSeed(state, potIndex);
+	if (result.success) {
+		showMessage('🌱', `<strong>${result.message}</strong><br>Seeds remaining: ${result.remaining}`, null);
 
-	// Visual feedback on the button (if it exists)
-	const btn = $(`btn-${action}`);
-	if (btn) {
-		btn.classList.add('just-done');
-		setTimeout(() => btn.classList.remove('just-done'), 400);
-	}
+		// Pop animation on egg
+		const egg = $('egg-sprite');
+		egg.style.animation = 'none';
+		void egg.offsetWidth;
+		egg.style.animation = 'eggPop 0.5s ease, eggFloat 3s ease-in-out 0.5s infinite';
 
-	// Pop animation on egg
-	const egg = $('egg-sprite');
-	egg.style.animation = 'none';
-	void egg.offsetWidth; // reflow
-	egg.style.animation = 'eggPop 0.5s ease, eggFloat 3s ease-in-out 0.5s infinite';
-
-	// Check if all done for today
-	const allDone = ACTIONS.every(a => state.dailyActions[a]);
-	if (allDone && !state.todayComplete) {
-		state.todayComplete = true;
-
-		// Reward health
-		applyHealthDelta(state, 4);
-		state.streak++;
-
-		// Nilame Ayya appears to bless the egg when all actions are complete
-		setTimeout(showNilameAyya, 1500);
-
-		// Win condition: complete all actions on day 14
-		if (state.currentDay >= TOTAL_DAYS) {
-			state.phase = 'hatched';
-			saveState(state);
-			updateUI(state);
-			triggerHatchEnding(state);
-			return;
+		// Trigger Nilame dialogue after first plant
+		if (state.dailyActions.plantsPlanted === 1) {
+			tryTriggerDialogue(state, 'after_minigame');
 		}
 
-		// Day-complete message (not the last day)
 		saveState(state);
 		updateUI(state);
-		showMessage(
-			'🌟',
-			`<strong>All done for Day ${state.currentDay}!</strong><br>
-       The egg feels happy and loved.<br>
-       <em>Come back tomorrow to continue!</em><br>
-       <small>Streak: ${state.streak} day${state.streak !== 1 ? 's' : ''}</small>`,
-			null
-		);
+	} else {
+		showMessage('❌', result.message, null);
+	}
+}
+
+/**
+ * Handle watering — called when watering can is used near a pot or egg.
+ * Each valid water action increments the daily watering counter.
+ */
+function handleWaterAction(state, potIndex) {
+	if (state.phase !== 'playing') return;
+
+	const result = waterPlant(state, potIndex || 0);
+	if (result.success) {
+		// Visual feedback on egg
+		const egg = $('egg-sprite');
+		if (egg) {
+			egg.style.animation = 'none';
+			void egg.offsetWidth;
+			egg.style.animation = 'eggPop 0.5s ease, eggFloat 3s ease-in-out 0.5s infinite';
+		}
+
+		saveState(state);
+		updateUI(state);
+	}
+	// Silently ignore if max waterings reached — don't spam messages
+}
+
+/**
+ * Handle drum play — called when a drum element is clicked.
+ * Updates daily action counter via gameController.
+ */
+function handleDrumAction(state) {
+	if (state.phase !== 'playing') return;
+
+	const result = gcPlayDrums(state);
+	if (result.success) {
+		saveState(state);
+		updateUI(state);
+	}
+	// Return whether the action was tracked (for coin reward decisions)
+	return result.success;
+}
+
+/**
+ * Handle crow chase — called when a crow is clicked and flies away.
+ * Updates daily action counter via gameController.
+ */
+function handleCrowChase(state) {
+	if (state.phase !== 'playing') return;
+
+	const result = gcChaseCrows(state, true);
+	if (result.success) {
+		saveState(state);
+		updateUI(state);
+
+		// Trigger Witch check on surplus seeds after chasing crows
+		if (shouldShowWitch(state)) {
+			tryTriggerWitchDialogue(state);
+		}
+	}
+	return result.success;
+}
+
+/**
+ * Handle "Complete Day" button press.
+ * Uses gameController.completeDay() for proper validation and state transitions.
+ */
+function handleCompleteDay(state) {
+	const result = completeDay(state);
+
+	if (!result.success) {
+		showMessage('⚠️', `<strong>${result.message}</strong><br>${result.missing ? result.missing.join('<br>') : ''}`, null);
 		return;
 	}
 
+	// Save and update UI
 	saveState(state);
 	updateUI(state);
+
+	if (result.final) {
+		// Game ended (hatched or game over)
+		if (state.phase === 'hatched') {
+			triggerHatchEnding(state);
+		} else {
+			checkEndStates(state);
+		}
+		return;
+	}
+
+	// Normal day completion
+	showNilameAyya();
+
+	showMessage(
+		'🌟',
+		`<strong>${result.message}</strong><br>
+		The egg feels happy and loved.<br>
+		<em>Come back tomorrow to continue!</em><br>
+		<small>Streak: ${state.streak} day${state.streak !== 1 ? 's' : ''}</small>`,
+		null
+	);
+}
+
+// ─── Dialogue Trigger Helpers ─────────────────────────────────
+/**
+ * Try to find and show a dialogue node matching a trigger type.
+ */
+function tryTriggerDialogue(state, triggerType) {
+	const gameContext = {
+		seeds: state.seeds,
+		level: state.currentLevel || 2,
+		gamesCompleted: state.totalSeedsEarned,
+		day: state.currentDay,
+		eggHealth: state.eggHealth
+	};
+
+	const node = findTriggeredNode(DIALOGUE_NODES, { type: triggerType, gameContext });
+	if (node) {
+		setTimeout(() => {
+			showDialogue(node, (index, choice) => {
+				processChoice(choice, (nextNodeId) => {
+					// Find and show the next node if one is specified
+					const nextNode = DIALOGUE_NODES.find(n => n.id === nextNodeId);
+					if (nextNode) {
+						showDialogue(nextNode, (idx, ch) => {
+							processChoice(ch, null);
+							// Apply coin effects to game state
+							if (ch.effects && ch.effects.coins) {
+								state.coins.gold += ch.effects.coins;
+								saveState(state);
+								updateUI(state);
+							}
+						});
+					}
+				});
+				// Apply coin effects to game state
+				if (choice.effects && choice.effects.coins) {
+					state.coins.gold += choice.effects.coins;
+					saveState(state);
+					updateUI(state);
+				}
+			});
+		}, 1000);
+	}
+}
+
+/**
+ * Trigger the Witch's seed-trade dialogue when player has surplus seeds.
+ */
+function tryTriggerWitchDialogue(state) {
+	const gameContext = {
+		seeds: state.seeds,
+		level: state.currentLevel || 2,
+		gamesCompleted: state.totalSeedsEarned,
+		day: state.currentDay,
+		eggHealth: state.eggHealth
+	};
+
+	const node = findTriggeredNode(DIALOGUE_NODES, { type: 'conditional', gameContext });
+	if (node) {
+		setTimeout(() => {
+			showDialogue(node, (index, choice) => {
+				processChoice(choice, (nextNodeId) => {
+					const nextNode = DIALOGUE_NODES.find(n => n.id === nextNodeId);
+					if (nextNode) {
+						showDialogue(nextNode, (idx, ch) => processChoice(ch, null));
+					}
+				});
+
+				// Handle "Take them" (gave_seeds flag)
+				if (choice.effects && choice.effects.flags && choice.effects.flags.includes('gave_seeds')) {
+					const giveResult = giveSeeds(state, Math.min(state.seeds, 2));
+					showMessage('🧙‍♀️', `The Witch took ${giveResult.given} seed${giveResult.given !== 1 ? 's' : ''}. Seeds remaining: ${giveResult.remaining}`, null);
+
+					// Nilame reacts to giving seeds
+					setTimeout(() => tryTriggerDialogue(state, 'interrupt'), 2000);
+				}
+
+				if (choice.effects && choice.effects.coins) {
+					state.coins.gold += choice.effects.coins;
+				}
+				saveState(state);
+				updateUI(state);
+			});
+		}, 1500);
+	}
 }
 
 function triggerHatchEnding(state) {
@@ -395,11 +579,6 @@ function checkEndStates(state) {
 				updateUI(state);
 			}
 		);
-		// Disable actions (if buttons exist)
-		for (const a of ACTIONS) {
-			const btn = $(`btn-${a}`);
-			if (btn) btn.disabled = true;
-		}
 	} else if (state.phase === 'hatched') {
 		triggerHatchEnding(state);
 	}
@@ -562,7 +741,9 @@ function init() {
 	}
 
 	// First ever visit
-	if (!wasNewDay && state.streak === 0 && ACTIONS.every(a => !state.dailyActions[a])) {
+	if (!wasNewDay && state.streak === 0 && !state.todayComplete &&
+		state.dailyActions.plantsPlanted === 0 && state.dailyActions.plantsWatered === 0 &&
+		state.dailyActions.drumsPlayed === 0 && state.dailyActions.crowsChased === 0) {
 		// First load on day 1 — show welcome
 		if (state.currentDay === 1) {
 			setTimeout(() => {
@@ -572,6 +753,10 @@ function init() {
            A Koel egg has been entrusted to you.<br>
            <br>
            Complete 4 daily actions each day for <strong>14 days</strong>.<br>
+           🌱 Plant 3 seeds &nbsp; 💧 Water 9 times<br>
+           🥁 Play drums 2x &nbsp; 🐦 Chase crows 3x<br>
+           <br>
+           <strong>Earn seeds</strong> from the map mini-games!<br>
            Keep your streak alive and watch it hatch on<br>
            <strong>Sinhala &amp; Tamil New Year (April 14)!</strong>`,
 					null
@@ -584,15 +769,33 @@ function init() {
 	checkEndStates(state);
 	maybeShowNewDayMessage(state, wasNewDay, missedDays);
 
-	// ── Wire action buttons (if they exist) ──
-	for (const action of ACTIONS) {
-		const btn = $(`btn-${action}`);
-		if (btn) {
-			btn.addEventListener('click', () => {
-				handleAction(state, action);
-			});
-		}
+	// ── Wire Complete Day button ──
+	const completeDayBtn = $('complete-day-btn');
+	if (completeDayBtn) {
+		completeDayBtn.addEventListener('click', () => {
+			handleCompleteDay(state);
+		});
 	}
+
+	// ── Wire "Go to Map" button for POI seed earning ──
+	const gotoMapBtn = $('goto-map-btn');
+	if (gotoMapBtn) {
+		gotoMapBtn.addEventListener('click', () => {
+			switchLevel(state, 1);
+			initLevel1(state);
+		});
+	}
+
+	// ── Wire pot clicks for planting seeds ──
+	const potCells = document.querySelectorAll('.pot-cell');
+	potCells.forEach((cell, index) => {
+		cell.addEventListener('click', () => {
+			// Only plant if the pot doesn't already have a plant
+			if (!cell.classList.contains('has-plant')) {
+				handlePlantSeed(state, index);
+			}
+		});
+	});
 
 	// ── Message close (already wired per call) ──
 	// (see showMessage above)
@@ -601,15 +804,20 @@ function init() {
 	$('debug-next-day').addEventListener('click', () => {
 		if (state.phase !== 'playing') return;
 
-		// Simulate next day: process current day actions then advance
-		const completedCount = ACTIONS.filter(a => state.dailyActions[a]).length;
-		applyHealthDelta(state, completedCount);
-		if (completedCount === 4) state.streak++;
-		else if (completedCount < 3) state.streak = 0;
+		// Check completion level based on daily progress
+		const pct = getDailyProgress(state);
+		const completionLevel = pct >= 100 ? 'complete' : pct > 0 ? 'partial' : 'none';
+		applyHealthDelta(state, completionLevel);
+		if (pct >= 100) state.streak++;
+		else if (pct < 50) state.streak = 0;
 
 		state.currentDay = Math.min(TOTAL_DAYS, state.currentDay + 1);
-		state.dailyActions = { water: false, sing: false, feed: false, protect: false };
+		state.dailyActions = { plantsPlanted: 0, plantsWatered: 0, drumsPlayed: 0, crowsChased: 0 };
 		state.todayComplete = false;
+		state.eggGlowing = false;
+		state.seedsUsedToday = 0;
+		state.poisPlayedToday = 0;
+		state.witchOfferedSeedsToday = false;
 
 		if (state.eggHealth <= 0) state.phase = 'gameover';
 		else if (state.currentDay >= TOTAL_DAYS && state.todayComplete) state.phase = 'hatched';
@@ -761,6 +969,11 @@ function startDrumSystem() {
 function playDrums() {
 	if (drumsPlaying) return; // Already drumming
 
+	const state = loadState();
+
+	// Track drum action via gameController
+	const tracked = handleDrumAction(state);
+
 	const drumLeft = $('drum-left');
 	const drumRight = $('drum-right');
 
@@ -898,6 +1111,13 @@ function spawnWitch() {
 		return;
 	}
 
+	const state = loadState();
+	// Don't spawn witch if game is not playing
+	if (state.phase !== 'playing') {
+		scheduleNextWitch();
+		return;
+	}
+
 	const container = $('game-container');
 	if (!container) return;
 
@@ -915,12 +1135,8 @@ function spawnWitch() {
 
 	container.appendChild(el);
 
-	// Flash a warning message
-	showMessage(
-		'🧙‍♀️',
-		'<strong>A witch appeared!</strong><br>Click her quickly to chase her away!',
-		null
-	);
+	// Try to trigger a Witch dialogue (random type)
+	tryTriggerDialogue(state, 'random');
 
 	// Player must click within 8 seconds or lose health
 	let dismissed = false;
@@ -930,19 +1146,25 @@ function spawnWitch() {
 		// Reward: silver coin for acting fast
 		spawnCoin('silver', el);
 		hideWitch(el);
+
+		// Check if Witch should offer seed trade
+		if (shouldShowWitch(state)) {
+			tryTriggerWitchDialogue(state);
+		}
+
 		scheduleNextWitch();
 	});
 
 	setTimeout(() => {
 		if (!dismissed) {
 			// Witch wasn't chased — apply health penalty to current state
-			const state = loadState();
-			if (state.phase === 'playing') {
-				state.eggHealth = Math.max(0, state.eggHealth - 10);
-				if (state.eggHealth <= 0) state.phase = 'gameover';
-				saveState(state);
-				updateUI(state);
-				checkEndStates(state);
+			const currentState = loadState();
+			if (currentState.phase === 'playing') {
+				currentState.eggHealth = Math.max(0, currentState.eggHealth - 10);
+				if (currentState.eggHealth <= 0) currentState.phase = 'gameover';
+				saveState(currentState);
+				updateUI(currentState);
+				checkEndStates(currentState);
 			}
 			hideWitch(el);
 		}
@@ -1239,7 +1461,7 @@ function waterAction() {
 		}
 	}, 160);  // 160ms per frame = 800ms total for 5 frames
 
-	// Check if watering the egg
+	// Check if watering the egg/pots area
 	const canRect = canElement.getBoundingClientRect();
 	const eggRect = $('egg-sprite')?.getBoundingClientRect();
 
@@ -1249,13 +1471,10 @@ function waterAction() {
 			canRect.top + canRect.height / 2 - (eggRect.top + eggRect.height / 2)
 		);
 
-		// If close enough to egg, trigger water action effect
-		if (distance < 150) {
-			// Visual feedback on egg
-			const egg = $('egg-sprite');
-			egg.style.animation = 'none';
-			void egg.offsetWidth; // reflow
-			egg.style.animation = 'eggPop 0.5s ease, eggFloat 3s ease-in-out 0.5s infinite';
+		// If close enough to egg area, trigger water action via gameController
+		if (distance < 200) {
+			const state = loadState();
+			handleWaterAction(state, 0);
 		}
 	}
 
@@ -1365,6 +1584,10 @@ function flyAwayCrow(el) {
 
 	el.classList.remove('idle');
 	el.classList.add('flying-away');
+
+	// Track crow chase via gameController
+	const state = loadState();
+	handleCrowChase(state);
 
 	// Spawn silver coin from crow position
 	spawnCoin('silver', el);

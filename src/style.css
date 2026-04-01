@@ -239,6 +239,182 @@ body {
 	color: var(--brown);
 }
 
+/* ─── Seed Counter ─────────────────────────────────────── */
+#seed-display {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 3px 6px;
+	background: rgba(76, 175, 80, 0.15);
+	border-radius: 8px;
+	border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.seed-label {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(7px, 0.75vw, 12px);
+	color: var(--brown);
+}
+
+.seed-value {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(10px, 1vw, 16px);
+	font-weight: 700;
+	color: #2e7d32;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Daily Action Tracker ─────────────────────────────── */
+#daily-action-tracker {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	width: 100%;
+}
+
+.action-row {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 4px;
+	border-radius: 4px;
+	transition: background 0.3s ease;
+}
+
+.action-row.done {
+	background: rgba(76, 175, 80, 0.2);
+}
+
+.action-row.done .action-progress {
+	color: #2e7d32;
+	font-weight: 700;
+}
+
+.action-row.done .action-progress::after {
+	content: ' ✓';
+}
+
+.action-icon {
+	font-size: clamp(8px, 0.9vw, 14px);
+	flex-shrink: 0;
+}
+
+.action-name {
+	font-family: 'Crimson Text', serif;
+	font-size: clamp(7px, 0.78vw, 12px);
+	color: #3a2210;
+	flex: 1;
+}
+
+.action-progress {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(7px, 0.7vw, 11px);
+	color: #7a5030;
+	white-space: nowrap;
+	transition: color 0.3s ease;
+}
+
+/* ─── Daily Progress Bar ───────────────────────────────── */
+#daily-progress-display {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+	margin-top: 2px;
+}
+
+.daily-progress-label {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(7px, 0.75vw, 12px);
+	color: var(--brown);
+}
+
+#daily-progress-bar-outer {
+	width: 90%;
+	height: clamp(5px, 0.8vh, 10px);
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 10px;
+	border: 1px solid var(--brown);
+	overflow: hidden;
+}
+
+#daily-progress-bar-fill {
+	height: 100%;
+	width: 0%;
+	background: linear-gradient(to right, #ff9800, #ffc107);
+	border-radius: 10px;
+	transition: width 0.6s ease;
+}
+
+#daily-progress-value {
+	font-size: clamp(7px, 0.75vw, 12px);
+	color: var(--brown);
+}
+
+/* ─── Complete Day Button ──────────────────────────────── */
+#complete-day-btn {
+	margin-top: 4px;
+	padding: 4px 8px;
+	background: linear-gradient(to bottom, #ffd700, #e6ac00);
+	border: 2px solid var(--brown);
+	border-radius: 8px;
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(7px, 0.8vw, 13px);
+	color: var(--brown);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	animation: pulse 1.5s ease-in-out infinite;
+	width: 100%;
+}
+
+#complete-day-btn:hover {
+	background: linear-gradient(to bottom, #ffe44d, #ffd700);
+	transform: scale(1.05);
+}
+
+#complete-day-btn.hidden {
+	display: none;
+}
+
+@keyframes pulse {
+	0%, 100% { box-shadow: 0 0 4px rgba(255, 215, 0, 0.4); }
+	50% { box-shadow: 0 0 12px rgba(255, 215, 0, 0.8); }
+}
+
+/* ─── Go to Map Button ─────────────────────────────────── */
+#goto-map-btn {
+	width: clamp(40px, 5vw, 80px);
+	height: clamp(40px, 5vw, 80px);
+	border-radius: 50%;
+	border: 3px solid var(--brown);
+	background: linear-gradient(to bottom, #a8d08d, #6b9e4f);
+	font-size: clamp(18px, 2.5vw, 36px);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35));
+}
+
+#goto-map-btn:hover {
+	transform: scale(1.08) rotate(-5deg);
+	background: linear-gradient(to bottom, #b8e09d, #7bae5f);
+}
+
+/* ─── Egg Glow Effect ──────────────────────────────────── */
+#egg-sprite.egg-glowing {
+	animation: eggFloat 3s ease-in-out infinite, eggGlow 2s ease-in-out infinite !important;
+	filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 40px rgba(255, 200, 50, 0.4)) brightness(1.1);
+}
+
+@keyframes eggGlow {
+	0%, 100% {
+		filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 30px rgba(255, 200, 50, 0.3)) brightness(1.05);
+	}
+	50% {
+		filter: drop-shadow(0 0 25px rgba(255, 215, 0, 1)) drop-shadow(0 0 50px rgba(255, 200, 50, 0.6)) brightness(1.15);
+	}
+}
+
 /* ─────────────────────────────────────────────────────────
    EGG AREA — right-centre of the super_bg countryside scene
    Egg sits on the open grassy path area on the right side
