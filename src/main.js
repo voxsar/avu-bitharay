@@ -22,6 +22,7 @@ import { initLevel1, setLevel1StateCache } from './level1.js';
 import './level1Debug.js'; // Debug helpers for Level 1
 import { getLocalPlayer, loginPlayer, registerPlayer, loadAllProgress, saveGameProgress, submitScore, computeScore } from './api.js';
 import { setPlantStateCache } from './plants.js';
+import { initDialogueState, getDialogueState } from './dialogue.js';
 
 // ─── Constants ────────────────────────────────────────────────
 const TOTAL_DAYS = 14;
@@ -55,7 +56,7 @@ function makeDefaultState() {
 	return {
 		currentLevel: 1,  // 1 = map exploration, 2 = egg caring
 		level1Complete: false,
-		collectedItems: { egg: false, plants: [] }, // plants from Level 1
+		collectedItems: { seeds: 0 }, // seeds from Level 1
 		startDate: today,
 		lastVisitDate: today,
 		currentDay: 1,
@@ -65,6 +66,7 @@ function makeDefaultState() {
 		todayComplete: false,
 		phase: 'playing',  // 'playing' | 'hatched' | 'gameover'
 		coins: { gold: 0, red: 0, silver: 0 },  // coin collection
+		dialogueState: null,  // Will be managed by dialogue.js
 	};
 }
 
@@ -76,6 +78,8 @@ function loadState() {
 }
 
 function saveState(state) {
+	// Sync dialogue state into game state before saving
+	state.dialogueState = getDialogueState();
 	_gameState = state;
 	saveGameProgress(state);
 }
@@ -1055,6 +1059,9 @@ async function startLoader() {
 		: makeDefaultState();
 	setLevel1StateCache(progress.level1);
 	setPlantStateCache(progress.plants);
+
+	// Initialize dialogue state
+	initDialogueState(_gameState.dialogueState);
 
 	// Hide loader, show game
 	if (loadingScreen) loadingScreen.classList.add('hidden');

@@ -77,10 +77,6 @@ function renderHotspot(container, hotspot) {
 }
 
 function getTooltipText(hotspot) {
-	const rewardText = hotspot.reward.type === 'egg'
-		? '🥚 Egg'
-		: `🌸 ${capitalize(hotspot.reward.plantType)}`;
-
 	const gameTypeText = {
 		'tilematch': '🎴 Tile Match',
 		'riddle': '❓ Riddle',
@@ -88,9 +84,9 @@ function getTooltipText(hotspot) {
 	}[hotspot.gameType] || 'Game';
 
 	if (hotspot.state === 'available') {
-		return `${gameTypeText}<br>Reward: ${rewardText}`;
+		return `${gameTypeText}<br>Reward: 🌸 1 Seed`;
 	} else if (hotspot.state === 'won') {
-		return `Completed!<br>Won: ${rewardText}`;
+		return `Completed!<br>Won: 🌸 1 Seed`;
 	} else if (hotspot.state === 'failed') {
 		return hotspot.retries > 0
 			? `Failed<br>${hotspot.retries} ${hotspot.retries === 1 ? 'retry' : 'retries'} left`
@@ -107,24 +103,21 @@ export function updateProgressDisplay(level1State) {
 	const progressPanel = $('level1-progress');
 	if (!progressPanel) return;
 
-	const { egg, plants } = level1State.itemsCollected;
+	const seedsCollected = level1State.seedsCollected || 0;
 	const gamesPlayed = level1State.gamesPlayed;
 	const totalGames = level1State.hotspots.length;
 	const remaining = totalGames - gamesPlayed;
 
 	progressPanel.innerHTML = `
 		<div class="progress-item">
-			<span class="progress-label">Egg:</span>
-			<span class="progress-value">${egg ? '✅' : '❌'}</span>
-		</div>
-		<div class="progress-item">
-			<span class="progress-label">Plants:</span>
-			<span class="progress-value">${plants.length} / 2</span>
+			<span class="progress-label">🌸 Seeds:</span>
+			<span class="progress-value">${seedsCollected}</span>
 		</div>
 		<div class="progress-item">
 			<span class="progress-label">Games Left:</span>
 			<span class="progress-value">${remaining}</span>
 		</div>
+		${seedsCollected >= 2 ? '<div class="progress-item"><span class="progress-unlock">✨ Can Progress!</span></div>' : ''}
 	`;
 }
 
@@ -132,10 +125,9 @@ export function updateProgressDisplay(level1State) {
 /**
  * Show game modal with mini-game
  * @param {Object} game - Game instance (TileMatchGame, RiddleGame, or TofuHunterGame)
- * @param {Object} reward - {type: 'egg' | 'plant', plantType?: string}
  * @param {Function} onComplete - Callback (won: boolean)
  */
-export function showGameModal(game, reward, onComplete) {
+export function showGameModal(game, onComplete) {
 	const modal = $('game-modal');
 	if (!modal) {
 		console.error('game-modal element not found!');
@@ -144,20 +136,12 @@ export function showGameModal(game, reward, onComplete) {
 
 	currentGame = game;
 
-	// Build reward preview
-	const rewardIcon = reward.type === 'egg' ? '🥚' : '🌸';
-	const rewardName = reward.type === 'egg'
-		? 'Egg'
-		: capitalize(reward.plantType);
-
+	// Build modal content
 	modal.innerHTML = `
 		<div class="game-modal-content">
 			<div class="game-modal-header">
 				<h2>${game.getTitle()}</h2>
-				<div class="game-reward-preview">
-					<span class="reward-icon">${rewardIcon}</span>
-					<span class="reward-name">${rewardName}</span>
-				</div>
+				<div class="game-reward">Reward: 🌸 1 Flower Seed</div>
 			</div>
 			<div class="game-container" id="game-container-inner"></div>
 			<button id="close-game-modal" class="game-close-btn">✖</button>
@@ -169,7 +153,7 @@ export function showGameModal(game, reward, onComplete) {
 	// Initialize game
 	const gameContainer = $('game-container-inner');
 	game.init(gameContainer, (won) => {
-		handleGameEnd(won, reward, onComplete);
+		handleGameEnd(won, onComplete);
 	});
 
 	// Close button handler (forfeit)
@@ -183,7 +167,7 @@ export function showGameModal(game, reward, onComplete) {
 	});
 }
 
-function handleGameEnd(won, reward, onComplete) {
+function handleGameEnd(won, onComplete) {
 	const modal = $('game-modal');
 	const gameContainer = $('game-container-inner');
 
@@ -194,19 +178,14 @@ function handleGameEnd(won, reward, onComplete) {
 	}
 
 	// Show result screen
-	const rewardIcon = reward.type === 'egg' ? '🥚' : '🌸';
-	const rewardName = reward.type === 'egg'
-		? 'Egg'
-		: capitalize(reward.plantType);
-
 	gameContainer.innerHTML = `
 		<div class="game-result ${won ? 'win' : 'lose'}">
 			<div class="result-icon">${won ? '🎉' : '😔'}</div>
 			<h2>${won ? 'You Won!' : 'Try Again!'}</h2>
 			${won ? `
 				<div class="reward-display">
-					<div class="reward-icon-large">${rewardIcon}</div>
-					<div class="reward-name-large">${rewardName}</div>
+					<div class="reward-icon-large">🌸</div>
+					<div class="reward-name-large">1 Flower Seed</div>
 				</div>
 			` : '<p>Better luck next time!</p>'}
 			<button id="result-ok-btn" class="result-btn">OK</button>
