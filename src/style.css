@@ -403,7 +403,6 @@ body {
 /* ─── Egg Glow Effect ──────────────────────────────────── */
 #egg-sprite.egg-glowing {
 	animation: eggFloat 3s ease-in-out infinite, eggGlow 2s ease-in-out infinite !important;
-	filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 40px rgba(255, 200, 50, 0.4)) brightness(1.1);
 }
 
 @keyframes eggGlow {

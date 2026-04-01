@@ -1474,7 +1474,22 @@ function waterAction() {
 		// If close enough to egg area, trigger water action via gameController
 		if (distance < 200) {
 			const state = loadState();
-			handleWaterAction(state, 0);
+			// Determine closest pot based on can position
+			const potCells = document.querySelectorAll('.pot-cell');
+			let closestPotIndex = 0;
+			let closestDist = Infinity;
+			potCells.forEach((cell, idx) => {
+				const potRect = cell.getBoundingClientRect();
+				const d = Math.hypot(
+					canRect.left + canRect.width / 2 - (potRect.left + potRect.width / 2),
+					canRect.top + canRect.height / 2 - (potRect.top + potRect.height / 2)
+				);
+				if (d < closestDist) {
+					closestDist = d;
+					closestPotIndex = idx;
+				}
+			});
+			handleWaterAction(state, closestPotIndex);
 		}
 	}
 
