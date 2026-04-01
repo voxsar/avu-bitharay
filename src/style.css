@@ -2158,6 +2158,26 @@ to   { transform: translateX(0) scale(0.5); opacity: 0; }
 	line-height: 1.3;
 }
 
+#auth-forms {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.auth-section-title {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: 0.9rem;
+	color: var(--brown);
+	margin: 0 0 14px;
+	text-align: center;
+}
+
+.auth-divider {
+	border-top: 2px dashed var(--gold);
+	margin: 20px 0;
+	opacity: 0.5;
+}
+
 #auth-tabs {
 	display: flex;
 	gap: 8px;

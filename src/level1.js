@@ -9,7 +9,7 @@
 import { switchLevel, saveState, loadState, showMessage } from './main.js';
 import { initLevel1UI, updateProgressDisplay, showGameModal, showNarratorHelp } from './level1UI.js';
 import { TileMatchGame, RiddleGame, TofuHunterGame } from './miniGames.js';
-import { saveLevel1Progress } from './api.js';
+import { saveLevel1Progress, saveGameProgress } from './api.js';
 
 // ─── Constants ────────────────────────────────────────────────
 const TOTAL_HOTSPOTS = 12;
@@ -311,9 +311,10 @@ function checkLevel1Complete() {
 		);
 
 		// Auto-transition to Level 2 after 3 seconds
-		setTimeout(() => {
-			switchLevel(mainState, 2);
+		setTimeout(async () => {
+			mainState.currentLevel = 2;
 			document.getElementById('message-overlay').classList.add('hidden');
+			try { await saveGameProgress(mainState); } catch (err) { console.warn('Failed to save state before transition:', err); }
 			location.reload(); // Reload to initialize Level 2
 		}, 3000);
 
@@ -348,9 +349,10 @@ function checkLevel1Complete() {
 		);
 
 		// Auto-transition to Level 2 after 4 seconds (longer to read the warnings)
-		setTimeout(() => {
-			switchLevel(mainState, 2);
+		setTimeout(async () => {
+			mainState.currentLevel = 2;
 			document.getElementById('message-overlay').classList.add('hidden');
+			try { await saveGameProgress(mainState); } catch (err) { console.warn('Failed to save state before transition:', err); }
 			location.reload();
 		}, 4000);
 

@@ -100,8 +100,8 @@ export async function loadAllProgress() {
  */
 export function saveGameProgress(state) {
 	const player = getLocalPlayer();
-	if (!player) return;
-	fetch(`${API_BASE}/progress/game`, {
+	if (!player) return Promise.resolve();
+	return fetch(`${API_BASE}/progress/game`, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${player.token}` },
 		body: JSON.stringify({ state }),
