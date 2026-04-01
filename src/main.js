@@ -920,6 +920,8 @@ function hideWitch(el) {
 function initAuth() {
 	const player = getLocalPlayer();
 	if (player) {
+		const screen = $('auth-screen');
+		if (screen) screen.classList.add('hidden');
 		startLoader();
 		return;
 	}
@@ -929,38 +931,6 @@ function initAuth() {
 function showAuthScreen() {
 	const screen = $('auth-screen');
 	if (screen) screen.classList.remove('hidden');
-
-	const tabLogin = $('tab-login');
-	const tabRegister = $('tab-register');
-	const loginForm = $('login-form');
-	const registerForm = $('register-form');
-
-	// Safety check: ensure all elements exist
-	if (!tabLogin || !tabRegister || !loginForm || !registerForm) {
-		console.error('Auth screen elements not found:', {
-			tabLogin: !!tabLogin,
-			tabRegister: !!tabRegister,
-			loginForm: !!loginForm,
-			registerForm: !!registerForm
-		});
-		return;
-	}
-
-	// Tab switching
-	tabLogin.addEventListener('click', () => {
-		console.log('Login tab clicked');
-		tabLogin.classList.add('active');
-		tabRegister.classList.remove('active');
-		loginForm.classList.remove('hidden');
-		registerForm.classList.add('hidden');
-	});
-	tabRegister.addEventListener('click', () => {
-		console.log('Register tab clicked');
-		tabRegister.classList.add('active');
-		tabLogin.classList.remove('active');
-		registerForm.classList.remove('hidden');
-		loginForm.classList.add('hidden');
-	});
 
 	// Login submit
 	const loginBtn = $('login-submit');

@@ -11,31 +11,36 @@
 <body>
 
 	<!-- ── AUTH SCREEN ────────────────────────────────────────── -->
-	<div id="auth-screen">
+	<div id="auth-screen" class="hidden">
 		<div id="auth-box">
 			<div id="auth-icon">🥚</div>
 			<h1 id="auth-title">Koel's New Year<br>Egg Adventure</h1>
 
-			<div id="auth-tabs">
-				<button id="tab-login" class="auth-tab active">Login</button>
-				<button id="tab-register" class="auth-tab">Register</button>
-			</div>
+			<div id="auth-forms">
+				<!-- Login form -->
+				<div id="login-section">
+					<h3 class="auth-section-title">Login</h3>
+					<div id="login-form">
+						<input type="text" id="login-username" maxlength="30" placeholder="Player name" autocomplete="username" />
+						<input type="password" id="login-password" maxlength="128" placeholder="Password" autocomplete="current-password" />
+						<div id="login-error" class="auth-error hidden"></div>
+						<button id="login-submit" class="auth-btn">Login</button>
+					</div>
+				</div>
 
-			<!-- Login form -->
-			<div id="login-form">
-				<input type="text" id="login-username" maxlength="30" placeholder="Player name" autocomplete="username" />
-				<input type="password" id="login-password" maxlength="128" placeholder="Password" autocomplete="current-password" />
-				<div id="login-error" class="auth-error hidden"></div>
-				<button id="login-submit" class="auth-btn">Login</button>
-			</div>
+				<div class="auth-divider"></div>
 
-			<!-- Register form -->
-			<div id="register-form" class="hidden">
-				<input type="text" id="reg-username" maxlength="30" placeholder="Choose a player name" autocomplete="username" />
-				<input type="password" id="reg-password" maxlength="128" placeholder="Choose a password (min. 6 chars)" autocomplete="new-password" />
-				<input type="email" id="reg-email" maxlength="100" placeholder="Email (optional)" autocomplete="email" />
-				<div id="register-error" class="auth-error hidden"></div>
-				<button id="register-submit" class="auth-btn">Register</button>
+				<!-- Register form -->
+				<div id="register-section">
+					<h3 class="auth-section-title">New Player</h3>
+					<div id="register-form">
+						<input type="text" id="reg-username" maxlength="30" placeholder="Choose a player name" autocomplete="username" />
+						<input type="password" id="reg-password" maxlength="128" placeholder="Choose a password (min. 6 chars)" autocomplete="new-password" />
+						<input type="email" id="reg-email" maxlength="100" placeholder="Email (optional)" autocomplete="email" />
+						<div id="register-error" class="auth-error hidden"></div>
+						<button id="register-submit" class="auth-btn">Register</button>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
