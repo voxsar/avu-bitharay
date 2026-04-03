@@ -6,12 +6,12 @@
  */
 
 import { showGameModal, showNarratorHelp } from './level1UI.js';
-import { TileMatchGame, RiddleGame, TofuHunterGame } from './miniGames.js';
+import { TileMatchGame, RiddleGame, TofuHunterGame, PhotoTileMatchGame } from './miniGames.js';
 import { showMessage } from './main.js';
 
 // ─── Constants ────────────────────────────────────────────────
 const TOTAL_HOTSPOTS = 12;
-const GAME_TYPES = ['tilematch', 'riddle', 'tofuhunter'];
+const GAME_TYPES = ['tilematch', 'riddle', 'tofuhunter', 'phototilematch'];
 const MAX_DAILY_PLAYS = 10; // Optional limit on POI plays per day
 
 // ─── POI State Management ─────────────────────────────────────
@@ -140,6 +140,9 @@ function playPOI(hotspotId, gameState, onComplete) {
 			break;
 		case 'tofuhunter':
 			game = new TofuHunterGame();
+			break;
+		case 'phototilematch':
+			game = new PhotoTileMatchGame();
 			break;
 		default:
 			console.error('Unknown game type:', hotspot.gameType);
