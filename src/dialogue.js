@@ -12,17 +12,20 @@ export const CHARACTERS = {
 	nilame: {
 		name: 'Nilame',
 		color: '#8B4513',
-		emoji: '👨‍⚖️'
+		emoji: '👨‍⚖️',
+		image: 'assets/images/narrator_open.png'
 	},
 	witch: {
 		name: 'Witch',
 		color: '#9370DB',
-		emoji: '🧙‍♀️'
+		emoji: '🧙‍♀️',
+		image: 'assets/images/nona.png'
 	},
 	system: {
 		name: 'System',
 		color: '#666',
-		emoji: '⚙️'
+		emoji: '⚙️',
+		image: null
 	}
 };
 
@@ -208,13 +211,26 @@ export function markNodeSeen(nodeId) {
 }
 
 // ─── Dialogue UI ──────────────────────────────────────────────
+
+/** Prevent more than one dialogue popup at a time */
+let isDialogueOpen = false;
+
 /**
- * Show a dialogue box with character, message, and choices
+ * Show a dialogue box with character portrait, message, and choices.
+ * Only one dialogue may be open at a time.
  * @param {Object} node - Dialogue node to display
- * @param {Function} onChoice - Callback(choiceIndex)
+ * @param {Function} onChoice - Callback(choiceIndex, choice)
  */
 export function showDialogue(node, onChoice) {
+	if (isDialogueOpen) return;
+	isDialogueOpen = true;
+
 	const character = CHARACTERS[node.character] || CHARACTERS.system;
+
+	// Build the portrait section if the character has an image
+	const portraitHTML = character.image
+		? `<img class="dialogue-character-portrait" src="${character.image}" alt="${character.name}" />`
+		: `<span class="dialogue-character-icon">${character.emoji}</span>`;
 
 	// Create dialogue overlay
 	const overlay = document.createElement('div');
@@ -224,7 +240,7 @@ export function showDialogue(node, onChoice) {
 	overlay.innerHTML = `
 		<div class="dialogue-box">
 			<div class="dialogue-header">
-				<span class="dialogue-character-icon">${character.emoji}</span>
+				${portraitHTML}
 				<span class="dialogue-character-name" style="color: ${character.color}">${character.name}</span>
 			</div>
 			<div class="dialogue-content">
@@ -261,6 +277,7 @@ export function removeDialogue() {
 	if (overlay) {
 		overlay.remove();
 	}
+	isDialogueOpen = false;
 }
 
 /**

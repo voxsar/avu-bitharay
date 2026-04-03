@@ -10,6 +10,10 @@ export const GAME_HELP_TEXT = {
 		title: 'Memory Challenge',
 		instruction: 'Match all pairs of symbols by flipping tiles! Remember where each symbol is and match them before you run out of moves. Click tiles to flip them and find matching pairs.'
 	},
+	'🖼️ Photo Match': {
+		title: 'Photo Memory',
+		instruction: 'Match all pairs of faces by flipping tiles! Remember who is where and find every matching pair before you run out of moves.'
+	},
 	'❓ Riddle Challenge': {
 		title: 'Test Your Knowledge',
 		instruction: 'Answer the riddle before time runs out! Read the question carefully and choose the correct answer. Be quick - you only have a limited amount of time!'
@@ -537,5 +541,154 @@ export class TofuHunterGame {
 
 		// Remove event listeners
 		document.removeEventListener('keydown', this.handleKeydown);
+	}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PHOTO TILE MATCH GAME (larger grid using people images)
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * List of images from the people folder.
+ * Replace placeholder filenames with your actual photos.
+ * 10 images → 5×4 grid (20 tiles, 10 pairs).
+ */
+const PEOPLE_IMAGES = [
+	'assets/images/people/person1.svg',
+	'assets/images/people/person2.svg',
+	'assets/images/people/person3.svg',
+	'assets/images/people/person4.svg',
+	'assets/images/people/person5.svg',
+	'assets/images/people/person6.svg',
+	'assets/images/people/person7.svg',
+	'assets/images/people/person8.svg',
+	'assets/images/people/person9.svg',
+	'assets/images/people/person10.svg',
+];
+
+export class PhotoTileMatchGame {
+	constructor() {
+		this.container = null;
+		this.onComplete = null;
+		this.grid = [];
+		this.flipped = [];
+		this.matched = 0;
+		this.totalPairs = PEOPLE_IMAGES.length; // 10 unique images = 10 pairs to match
+		this.moves = 0;
+		this.maxMoves = 30; // more tiles → more allowed moves
+		this.images = [...PEOPLE_IMAGES];
+	}
+
+	getTitle() {
+		return '🖼️ Photo Match';
+	}
+
+	init(container, onComplete) {
+		this.container = container;
+		this.onComplete = onComplete;
+
+		container.innerHTML = `
+			<div class="tile-match-game photo-tile-match-game">
+				<div class="game-info">
+					<span>Moves: <span id="tile-moves">0</span> / ${this.maxMoves}</span>
+				</div>
+				<div class="tile-grid photo-tile-grid" id="tile-grid"></div>
+			</div>
+		`;
+
+		this.initGrid();
+	}
+
+	initGrid() {
+		// Create pairs — one card per image × 2
+		const cards = [];
+		this.images.forEach(src => {
+			cards.push({ src, id: Math.random() });
+			cards.push({ src, id: Math.random() });
+		});
+
+		// Shuffle using Fisher-Yates for unbiased randomisation
+		for (let i = cards.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[cards[i], cards[j]] = [cards[j], cards[i]];
+		}
+		this.grid = cards;
+
+		const gridEl = document.getElementById('tile-grid');
+		cards.forEach((card, index) => {
+			const tile = document.createElement('div');
+			tile.className = 'tile photo-tile';
+			tile.dataset.index = index;
+			tile.innerHTML = `
+				<div class="tile-inner">
+					<div class="tile-front">?</div>
+					<div class="tile-back"><img src="${card.src}" alt="person" class="photo-tile-img" /></div>
+				</div>
+			`;
+
+			tile.addEventListener('click', () => this.onTileClick(index));
+			gridEl.appendChild(tile);
+		});
+	}
+
+	onTileClick(index) {
+		const tile = this.container.querySelector(`[data-index="${index}"]`);
+
+		if (tile.classList.contains('flipped') || tile.classList.contains('matched')) {
+			return;
+		}
+
+		if (this.flipped.length >= 2) {
+			return;
+		}
+
+		tile.classList.add('flipped');
+		this.flipped.push(index);
+
+		if (this.flipped.length === 2) {
+			this.moves++;
+			document.getElementById('tile-moves').textContent = this.moves;
+			setTimeout(() => this.checkMatch(), 900);
+		}
+	}
+
+	checkMatch() {
+		const [idx1, idx2] = this.flipped;
+		const tile1 = this.container.querySelector(`[data-index="${idx1}"]`);
+		const tile2 = this.container.querySelector(`[data-index="${idx2}"]`);
+
+		const card1 = this.grid[idx1];
+		const card2 = this.grid[idx2];
+
+		if (card1.src === card2.src) {
+			tile1.classList.add('matched');
+			tile2.classList.add('matched');
+			this.matched++;
+
+			if (this.matched === this.totalPairs) {
+				setTimeout(() => this.win(), 500);
+			}
+		} else {
+			tile1.classList.remove('flipped');
+			tile2.classList.remove('flipped');
+		}
+
+		this.flipped = [];
+
+		if (this.moves >= this.maxMoves && this.matched < this.totalPairs) {
+			setTimeout(() => this.lose(), 500);
+		}
+	}
+
+	win() {
+		if (this.onComplete) this.onComplete(true);
+	}
+
+	lose() {
+		if (this.onComplete) this.onComplete(false);
+	}
+
+	destroy() {
+		// Cleanup
 	}
 }

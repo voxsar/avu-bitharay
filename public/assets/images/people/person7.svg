@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="100" height="120">
+  <rect width="100" height="120" rx="8" fill="#F8A5C2" opacity="0.3"/>
+  <circle cx="50" cy="32" r="22" fill="#F8A5C2" stroke="#E84393" stroke-width="2"/>
+  <ellipse cx="50" cy="95" rx="30" ry="25" fill="#F8A5C2" stroke="#E84393" stroke-width="2"/>
+  <text x="50" y="116" text-anchor="middle" font-size="9" font-family="sans-serif" fill="#E84393" font-weight="bold">Gimhani</text>
+</svg>

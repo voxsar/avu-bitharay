@@ -1050,13 +1050,8 @@ function showNilameAyya() {
 
 	nilameVisible = true;
 
-	// Play nilame sound - try mp3 first (better browser support), fallback to ogg
-	const audio = new Audio('assets/audio/nilame.mp3');
-	audio.addEventListener('error', () => {
-		// If mp3 fails, try ogg
-		const audioFallback = new Audio('assets/audio/nilame.ogg');
-		audioFallback.play().catch(err => console.log('Nilame audio fallback failed:', err));
-	});
+	// Play nilame sound - only nilame.ogg exists in the audio folder
+	const audio = new Audio('assets/audio/nilame.ogg');
 	audio.play().catch(err => console.log('Nilame audio play failed:', err));
 
 	// Create character element
@@ -1099,9 +1094,9 @@ function startWitchSystem() {
 }
 
 function scheduleNextWitch() {
-	// Appear every 2–5 minutes; more often when egg health is low
-	const baseDelay = 120000; // 2 minutes
-	const randomExtra = Math.random() * 180000; // 0–3 minutes
+	// Appear every 30–90 seconds; more often when egg health is low
+	const baseDelay = 30000; // 30 seconds
+	const randomExtra = Math.random() * 60000; // 0–60 seconds
 	witchTimer = setTimeout(spawnWitch, baseDelay + randomExtra);
 }
 
