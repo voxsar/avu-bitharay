@@ -4,7 +4,7 @@
 [build]
   # Build the Vite bundle, then copy runtime-referenced images into dist.
   # Audio files are handled automatically by Vite via publicDir: 'public'.
-  command   = "npm run build && cp -r assets/images dist/assets/images"
+  command   = "npm run build && cp -r assets/images/. dist/assets/images/"
   publish   = "dist"
 
 # Proxy /api/* to the backend (avoids CORS issues from same-origin requests)
