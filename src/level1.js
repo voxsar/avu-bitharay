@@ -8,7 +8,7 @@
  */
 
 import { switchLevel, saveState, loadState, showMessage } from './main.js';
-import { initLevel1UI, updateProgressDisplay, showGameModal, showNarratorHelp } from './level1UI.js';
+import { initLevel1UI, updateProgressDisplay, showGameModal, showNarratorHelp, updateHotspotDisplay } from './level1UI.js';
 import { TileMatchGame, RiddleGame, TofuHunterGame, PhotoTileMatchGame } from './miniGames.js';
 import { saveLevel1Progress, saveGameProgress } from './api.js';
 import { showDialogue, findTriggeredNode, processChoice, getDialogueState, markNodeSeen } from './dialogue.js';
@@ -235,6 +235,9 @@ function onGameComplete(hotspot, won) {
 
 		saveLevel1State(level1State);
 
+		// Update hotspot display to show checkmark
+		updateHotspotDisplay(hotspot);
+
 		// Update progress display
 		updateProgressDisplay(level1State);
 
@@ -276,6 +279,11 @@ function onGameComplete(hotspot, won) {
 		}
 
 		saveLevel1State(level1State);
+
+		// Update hotspot display to show new state
+		updateHotspotDisplay(hotspot);
+
+		// Update progress display
 		updateProgressDisplay(level1State);
 	}
 }

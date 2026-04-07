@@ -1,0 +1,376 @@
+/* ═══════════════════════════════════════════════════════════
+   LEADERBOARD PAGE — High Scores Display
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Fonts (matching main game) ─────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* ─── Reset ─────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+/* ─── CSS Variables ─────────────────────────────────────── */
+:root {
+	--gold: #e8a820;
+	--gold-light: #f7d87a;
+	--gold-dark: #c48a15;
+	--brown: #6b3a1f;
+	--parchment: #f2e8c8;
+	--bamboo: #5a7a2a;
+	--shadow: rgba(0, 0, 0, 0.65);
+	--bubble-bg: rgba(255, 252, 235, 0.95);
+	--border-color: #c9914a;
+}
+
+/* ─── Body ─────────────────────────────────────────────── */
+html,
+body {
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	font-family: 'Crimson Text', serif;
+	background-image: url('../assets/images/bg.png');
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-attachment: fixed;
+	color: var(--brown);
+}
+
+/* ─── Utility Classes ──────────────────────────────────── */
+.hidden {
+	display: none !important;
+}
+
+.visible {
+	display: block !important;
+}
+
+/* ─── Main Container ───────────────────────────────────── */
+#leaderboard-container {
+	max-width: 1200px;
+	margin: 40px auto;
+	padding: 20px;
+	background: var(--bubble-bg);
+	border: 4px solid var(--border-color);
+	border-radius: 16px;
+	box-shadow:
+		0 10px 40px rgba(0, 0, 0, 0.5),
+		0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+	backdrop-filter: blur(10px);
+}
+
+/* ─── Header ────────────────────────────────────────────── */
+#leaderboard-header {
+	text-align: center;
+	padding: 30px 20px;
+	border-bottom: 3px solid var(--gold);
+	margin-bottom: 30px;
+}
+
+#header-icon {
+	font-size: 5rem;
+	line-height: 1;
+	margin-bottom: 15px;
+	animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+
+	50% {
+		transform: translateY(-10px);
+	}
+}
+
+#leaderboard-header h1 {
+	font-family: 'Cinzel Decorative', cursive;
+	font-size: 3.5rem;
+	color: var(--gold-dark);
+	text-shadow:
+		2px 2px 0 var(--gold-light),
+		4px 4px 8px rgba(0, 0, 0, 0.3);
+	letter-spacing: 4px;
+	margin-bottom: 10px;
+}
+
+#leaderboard-header .subtitle {
+	font-size: 1.3rem;
+	color: var(--brown);
+	font-style: italic;
+	opacity: 0.85;
+}
+
+/* ─── Content Area ──────────────────────────────────────── */
+#leaderboard-content {
+	min-height: 400px;
+	padding: 20px;
+	position: relative;
+}
+
+/* ─── Loading Indicator ─────────────────────────────────── */
+#loading-indicator {
+	text-align: center;
+	padding: 80px 20px;
+}
+
+.spinner {
+	width: 60px;
+	height: 60px;
+	margin: 0 auto 20px;
+	border: 6px solid var(--parchment);
+	border-top-color: var(--gold);
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+#loading-indicator p {
+	font-size: 1.3rem;
+	color: var(--brown);
+	font-style: italic;
+}
+
+/* ─── Error Message ─────────────────────────────────────── */
+#leaderboard-error {
+	text-align: center;
+	padding: 80px 20px;
+}
+
+#leaderboard-error p {
+	font-size: 1.4rem;
+	color: #c44;
+	font-weight: 600;
+}
+
+/* ─── Leaderboard Table ─────────────────────────────────── */
+#leaderboard-table-wrapper {
+	overflow-x: auto;
+}
+
+#leaderboard-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 1.1rem;
+}
+
+#leaderboard-table thead {
+	background: linear-gradient(180deg, var(--gold-dark), var(--gold));
+	color: white;
+	text-transform: uppercase;
+	font-weight: 700;
+	letter-spacing: 1px;
+}
+
+#leaderboard-table thead th {
+	padding: 16px 12px;
+	text-align: center;
+	border: 2px solid var(--border-color);
+	font-size: 0.95rem;
+}
+
+#leaderboard-table tbody tr {
+	border-bottom: 1px solid rgba(201, 145, 74, 0.3);
+	transition: background-color 0.2s;
+}
+
+#leaderboard-table tbody tr:hover {
+	background-color: rgba(232, 168, 32, 0.1);
+}
+
+#leaderboard-table tbody tr.top-rank {
+	background-color: rgba(232, 168, 32, 0.15);
+	font-weight: 600;
+}
+
+#leaderboard-table tbody td {
+	padding: 14px 12px;
+	text-align: center;
+}
+
+#leaderboard-table .rank-col {
+	font-size: 1.4rem;
+	font-weight: 700;
+	width: 80px;
+}
+
+#leaderboard-table .player-col {
+	text-align: left;
+	font-weight: 600;
+	font-size: 1.2rem;
+	color: var(--brown);
+}
+
+#leaderboard-table .score-col {
+	font-weight: 700;
+	font-size: 1.3rem;
+	color: var(--gold-dark);
+}
+
+#leaderboard-table .day-col,
+#leaderboard-table .health-col {
+	font-weight: 600;
+}
+
+#leaderboard-table .coins-col {
+	font-size: 1rem;
+	white-space: nowrap;
+}
+
+#leaderboard-table .phase-col {
+	font-size: 0.95rem;
+}
+
+#leaderboard-table .no-data {
+	padding: 60px 20px !important;
+	text-align: center !important;
+	font-size: 1.3rem;
+	font-style: italic;
+	color: var(--brown);
+	opacity: 0.7;
+}
+
+/* ─── Footer ────────────────────────────────────────────── */
+#leaderboard-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 30px 20px 20px;
+	border-top: 3px solid var(--gold);
+	margin-top: 30px;
+	flex-wrap: wrap;
+	gap: 15px;
+}
+
+.back-button,
+.refresh-button {
+	padding: 12px 28px;
+	font-size: 1.1rem;
+	font-weight: 600;
+	font-family: 'Crimson Text', serif;
+	border: 3px solid var(--border-color);
+	border-radius: 8px;
+	background: linear-gradient(180deg, var(--parchment), #e8ddb0);
+	color: var(--brown);
+	text-decoration: none;
+	display: inline-block;
+	cursor: pointer;
+	transition: all 0.2s;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.back-button:hover,
+.refresh-button:hover {
+	background: linear-gradient(180deg, #fff, var(--parchment));
+	transform: translateY(-2px);
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.back-button:active,
+.refresh-button:active {
+	transform: translateY(0);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.refresh-button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+	transform: none !important;
+}
+
+/* ─── Responsive Design ─────────────────────────────────── */
+@media (max-width: 1024px) {
+	#leaderboard-container {
+		margin: 20px;
+	}
+
+	#leaderboard-header h1 {
+		font-size: 2.5rem;
+	}
+
+	#header-icon {
+		font-size: 4rem;
+	}
+
+	#leaderboard-table {
+		font-size: 1rem;
+	}
+
+	#leaderboard-table thead th {
+		padding: 12px 8px;
+		font-size: 0.85rem;
+	}
+
+	#leaderboard-table tbody td {
+		padding: 10px 8px;
+	}
+
+	#leaderboard-table .score-col {
+		font-size: 1.1rem;
+	}
+}
+
+@media (max-width: 768px) {
+	#leaderboard-header h1 {
+		font-size: 2rem;
+		letter-spacing: 2px;
+	}
+
+	#header-icon {
+		font-size: 3rem;
+	}
+
+	#leaderboard-header .subtitle {
+		font-size: 1.1rem;
+	}
+
+	#leaderboard-table {
+		font-size: 0.9rem;
+	}
+
+	#leaderboard-table thead th {
+		padding: 10px 6px;
+		font-size: 0.75rem;
+	}
+
+	#leaderboard-table tbody td {
+		padding: 8px 6px;
+	}
+
+	#leaderboard-table .rank-col {
+		font-size: 1.2rem;
+		width: 60px;
+	}
+
+	#leaderboard-table .player-col {
+		font-size: 1rem;
+	}
+
+	#leaderboard-table .score-col {
+		font-size: 1rem;
+	}
+
+	#leaderboard-footer {
+		flex-direction: column;
+	}
+
+	.back-button,
+	.refresh-button {
+		width: 100%;
+		text-align: center;
+	}
+}

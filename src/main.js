@@ -760,7 +760,7 @@ function init() {
 			setTimeout(() => {
 				showMessage(
 					'🥚',
-					`<strong>Welcome to Koel's New Year Egg Adventure!</strong><br>
+					`<strong>Welcome to New Year Egg Adventure!</strong><br>
            A Koel egg has been entrusted to you.<br>
            <br>
            Complete 4 daily actions each day for <strong>14 days</strong>.<br>
@@ -1016,7 +1016,7 @@ function startBackgroundMusic() {
  * Nilame Ayya — a friendly traditional Sri Lankan official who visits
  * to bless the egg. He appears after the player completes all four
  * daily actions (and randomly at other positive moments).
- * Audio: assets/audio/nilame.ogg
+ * Audio: assets/audio/nilame.mp3
  */
 let nilameVisible = false;
 
@@ -1027,8 +1027,8 @@ function showNilameAyya() {
 
 	nilameVisible = true;
 
-	// Play nilame sound - only nilame.ogg exists in the audio folder
-	const audio = new Audio('assets/audio/nilame.ogg');
+	// Play nilame sound - only nilame.mp3 exists in the audio folder
+	const audio = new Audio('assets/audio/nilame.mp3');
 	audio.play().catch(err => console.log('Nilame audio play failed:', err));
 
 	// Create character element

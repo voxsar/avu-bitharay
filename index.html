@@ -4,7 +4,27 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Koel's New Year Egg Adventure</title>
+	<title>New Year Egg Adventure</title>
+	<meta name="description"
+		content="Join the New Year Egg Adventure! Plant, water, and nurture your garden while collecting eggs and completing daily tasks in this festive interactive game." />
+
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://avurudhu.artslabcreatives.com/" />
+	<meta property="og:title" content="New Year Egg Adventure" />
+	<meta property="og:description"
+		content="Join the New Year Egg Adventure! Plant, water, and nurture your garden while collecting eggs and completing daily tasks in this festive interactive game." />
+	<meta property="og:image" content="https://avurudhu.artslabcreatives.com/assets/images/super_bg.png" />
+	<meta property="og:site_name" content="New Year Egg Adventure" />
+
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:url" content="https://avurudhu.artslabcreatives.com/" />
+	<meta name="twitter:title" content="New Year Egg Adventure" />
+	<meta name="twitter:description"
+		content="Join the New Year Egg Adventure! Plant, water, and nurture your garden while collecting eggs and completing daily tasks in this festive interactive game." />
+	<meta name="twitter:image" content="https://avurudhu.artslabcreatives.com/assets/images/super_bg.png" />
+
 	<link rel="stylesheet" href="src/style.css" />
 </head>
 
@@ -14,15 +34,17 @@
 	<div id="auth-screen" class="hidden">
 		<div id="auth-box">
 			<div id="auth-icon">🥚</div>
-			<h1 id="auth-title">Koel's New Year<br>Egg Adventure</h1>
+			<h1 id="auth-title">New Year<br>Egg Adventure</h1>
 
 			<div id="auth-forms">
 				<!-- Login form -->
 				<div id="login-section">
 					<h3 class="auth-section-title">Login</h3>
 					<div id="login-form">
-						<input type="text" id="login-username" maxlength="30" placeholder="Player name" autocomplete="username" />
-						<input type="password" id="login-password" maxlength="128" placeholder="Password" autocomplete="current-password" />
+						<input type="text" id="login-username" maxlength="30" placeholder="Player name"
+							autocomplete="username" />
+						<input type="password" id="login-password" maxlength="128" placeholder="Password"
+							autocomplete="current-password" />
 						<div id="login-error" class="auth-error hidden"></div>
 						<button id="login-submit" class="auth-btn">Login</button>
 					</div>
@@ -34,9 +56,12 @@
 				<div id="register-section">
 					<h3 class="auth-section-title">New Player</h3>
 					<div id="register-form">
-						<input type="text" id="reg-username" maxlength="30" placeholder="Choose a player name" autocomplete="username" />
-						<input type="password" id="reg-password" maxlength="128" placeholder="Choose a password (min. 6 chars)" autocomplete="new-password" />
-						<input type="email" id="reg-email" maxlength="100" placeholder="Email (optional)" autocomplete="email" />
+						<input type="text" id="reg-username" maxlength="30" placeholder="Choose a player name"
+							autocomplete="username" />
+						<input type="password" id="reg-password" maxlength="128"
+							placeholder="Choose a password (min. 6 chars)" autocomplete="new-password" />
+						<input type="email" id="reg-email" maxlength="100" placeholder="Email (optional)"
+							autocomplete="email" />
 						<div id="register-error" class="auth-error hidden"></div>
 						<button id="register-submit" class="auth-btn">Register</button>
 					</div>
@@ -145,7 +170,8 @@
 					</div>
 
 					<!-- Complete Day Button -->
-					<button id="complete-day-btn" class="hidden" title="All actions done! Complete the day.">✨ Complete Day</button>
+					<button id="complete-day-btn" class="hidden" title="All actions done! Complete the day.">✨ Complete
+						Day</button>
 				</div>
 			</div>
 
@@ -202,7 +228,7 @@
 				<!-- Center title panel (bottom_panel.png) -->
 				<div class="bottom-cell" id="title-cell">
 					<div id="bottom-panel-bg">
-						<div id="game-title-main">KOEL'S NEW YEAR EGG ADVENTURE</div>
+						<div id="game-title-main">NEW YEAR EGG ADVENTURE</div>
 						<div id="game-subtitle">Daily Habit &amp; Protection Game.</div>
 					</div>
 				</div>

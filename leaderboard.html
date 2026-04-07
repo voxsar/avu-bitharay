@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Leaderboard — New Year Egg Adventure</title>
+	<meta name="description"
+		content="View the top players and high scores in New Year Egg Adventure. Compete for the highest ranking!" />
+
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://avurudhu.artslabcreatives.com/leaderboard.html" />
+	<meta property="og:title" content="Leaderboard — New Year Egg Adventure" />
+	<meta property="og:description"
+		content="View the top players and high scores in New Year Egg Adventure. Compete for the highest ranking!" />
+	<meta property="og:image" content="https://avurudhu.artslabcreatives.com/assets/images/super_bg.png" />
+	<meta property="og:site_name" content="New Year Egg Adventure" />
+
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:url" content="https://avurudhu.artslabcreatives.com/leaderboard.html" />
+	<meta name="twitter:title" content="Leaderboard — New Year Egg Adventure" />
+	<meta name="twitter:description"
+		content="View the top players and high scores in New Year Egg Adventure. Compete for the highest ranking!" />
+	<meta name="twitter:image" content="https://avurudhu.artslabcreatives.com/assets/images/super_bg.png" />
+
+	<link rel="stylesheet" href="src/leaderboard.css" />
+</head>
+
+<body>
+	<div id="leaderboard-container">
+		<div id="leaderboard-header">
+			<div id="header-icon">🏆</div>
+			<h1>HIGH SCORES</h1>
+			<p class="subtitle">Top Players of New Year Egg Adventure</p>
+		</div>
+
+		<div id="leaderboard-content">
+			<div id="loading-indicator" class="visible">
+				<div class="spinner"></div>
+				<p>Loading leaderboard...</p>
+			</div>
+
+			<div id="leaderboard-error" class="hidden">
+				<p>⚠️ Failed to load leaderboard. Please try again later.</p>
+			</div>
+
+			<div id="leaderboard-table-wrapper" class="hidden">
+				<table id="leaderboard-table">
+					<thead>
+						<tr>
+							<th class="rank-col">Rank</th>
+							<th class="player-col">Player</th>
+							<th class="score-col">Score</th>
+							<th class="day-col">Day</th>
+							<th class="health-col">Health</th>
+							<th class="coins-col">Coins</th>
+							<th class="phase-col">Status</th>
+						</tr>
+					</thead>
+					<tbody id="leaderboard-body">
+						<!-- Rows will be inserted here by JavaScript -->
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<div id="leaderboard-footer">
+			<a href="/" class="back-button">← Back to Game</a>
+			<button id="refresh-button" class="refresh-button">🔄 Refresh</button>
+		</div>
+	</div>
+
+	<script type="module" src="src/leaderboard.js"></script>
+</body>
+
+</html>

@@ -99,6 +99,54 @@ function capitalize(str) {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+// ─── Update Hotspot Display ───────────────────────────────────
+/**
+ * Update a single hotspot's appearance after state change
+ */
+export function updateHotspotDisplay(hotspot) {
+	const mapContainer = $('map-container');
+	if (!mapContainer) return;
+
+	// Find the existing hotspot element
+	const existingEl = mapContainer.querySelector(`[data-id="${hotspot.id}"]`);
+	if (!existingEl) return;
+
+	// Update state attribute
+	existingEl.dataset.state = hotspot.state;
+
+	// Remove old state classes
+	existingEl.classList.remove('available', 'completed', 'failed');
+
+	// Update icon and classes based on new state
+	let icon = '';
+	if (hotspot.state === 'available') {
+		icon = '✨';
+		existingEl.classList.add('available');
+	} else if (hotspot.state === 'won') {
+		icon = '✅';
+		existingEl.classList.add('completed');
+	} else if (hotspot.state === 'failed') {
+		icon = hotspot.retries > 0 ? '💪' : '❌';
+		existingEl.classList.add('failed');
+	}
+
+	// Update the display
+	existingEl.innerHTML = `
+		<div class="hotspot-icon">${icon}</div>
+		<div class="hotspot-tooltip">
+			${getTooltipText(hotspot)}
+		</div>
+	`;
+
+	// Remove click handler if no longer available
+	if (hotspot.state !== 'available') {
+		existingEl.style.cursor = 'default';
+		// Clone and replace to remove all event listeners
+		const newEl = existingEl.cloneNode(true);
+		existingEl.parentNode.replaceChild(newEl, existingEl);
+	}
+}
+
 // ─── Progress Display ─────────────────────────────────────────
 export function updateProgressDisplay(level1State) {
 	const progressPanel = $('level1-progress');

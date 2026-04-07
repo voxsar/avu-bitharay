@@ -26,8 +26,15 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
 
 app.use(cors({
 	origin(origin, cb) {
-		// Allow server-to-server (no origin) and listed origins
-		if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+		// Allow server-to-server (no origin)
+		if (!origin) return cb(null, true);
+
+		// Allow exact matches from whitelist
+		if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+
+		// Allow any Netlify deploy preview or production URL (*.netlify.app)
+		if (origin.endsWith('.netlify.app')) return cb(null, true);
+
 		cb(new Error(`CORS: origin ${origin} not allowed`));
 	},
 	methods: ['GET', 'POST', 'OPTIONS'],

@@ -17,26 +17,58 @@ const router = express.Router();
 router.get('/leaderboard', (req, res) => {
 	const limit = Math.min(parseInt(req.query.limit) || 50, 100);
 
-	const rows = db.prepare(`
+	// Fetch all active players with game progress
+	const progressRows = db.prepare(`
     SELECT
-      s.id,
+      p.id,
       p.username,
-      s.score,
-      s.day_reached,
-      s.egg_health,
-      s.coins_gold,
-      s.coins_red,
-      s.coins_silver,
-      s.phase,
-      s.created_at,
-      ROW_NUMBER() OVER (ORDER BY s.score DESC, s.egg_health DESC, s.created_at ASC) AS rank
-    FROM scores s
-    JOIN players p ON p.id = s.player_id
-    ORDER BY s.score DESC, s.egg_health DESC, s.created_at ASC
-    LIMIT ?
-  `).all(limit);
+      gp.state_json,
+      gp.updated_at
+    FROM players p
+    JOIN game_progress gp ON p.id = gp.player_id
+    WHERE gp.state_json IS NOT NULL
+  `).all();
 
-	return res.json({ leaderboard: rows, total: rows.length });
+	// Compute live scores from game state
+	const liveScores = progressRows.map(row => {
+		const state = JSON.parse(row.state_json);
+		const dayPoints = (state.currentDay || 1) * 100;
+		const healthPoints = state.eggHealth || 0;
+		const coinPoints =
+			((state.coins?.gold || 0) * 2) +
+			(state.coins?.red || 0) +
+			(state.coins?.silver || 0);
+		const streakBonus = (state.streak || 0) * 25;
+		const hatchBonus = state.phase === 'hatched' ? 500 : 0;
+		const score = dayPoints + healthPoints + coinPoints + streakBonus + hatchBonus;
+
+		return {
+			id: row.id,
+			username: row.username,
+			score,
+			day_reached: state.currentDay || 1,
+			egg_health: state.eggHealth || 0,
+			coins_gold: state.coins?.gold || 0,
+			coins_red: state.coins?.red || 0,
+			coins_silver: state.coins?.silver || 0,
+			phase: state.phase || 'playing',
+			created_at: row.updated_at,
+		};
+	});
+
+	// Sort by score descending, then health descending
+	liveScores.sort((a, b) => {
+		if (b.score !== a.score) return b.score - a.score;
+		return b.egg_health - a.egg_health;
+	});
+
+	// Add rank and limit results
+	const ranked = liveScores.slice(0, limit).map((entry, index) => ({
+		...entry,
+		rank: index + 1,
+	}));
+
+	return res.json({ leaderboard: ranked, total: ranked.length });
 });
 
 // ─── POST /api/scores ─────────────────────────────────────────
