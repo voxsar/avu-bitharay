@@ -378,8 +378,15 @@ body {
 }
 
 @keyframes pulse {
-	0%, 100% { box-shadow: 0 0 4px rgba(255, 215, 0, 0.4); }
-	50% { box-shadow: 0 0 12px rgba(255, 215, 0, 0.8); }
+
+	0%,
+	100% {
+		box-shadow: 0 0 4px rgba(255, 215, 0, 0.4);
+	}
+
+	50% {
+		box-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+	}
 }
 
 /* ─── Go to Map Button ─────────────────────────────────── */
@@ -406,9 +413,12 @@ body {
 }
 
 @keyframes eggGlow {
-	0%, 100% {
+
+	0%,
+	100% {
 		filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 30px rgba(255, 200, 50, 0.3)) brightness(1.05);
 	}
+
 	50% {
 		filter: drop-shadow(0 0 25px rgba(255, 215, 0, 1)) drop-shadow(0 0 50px rgba(255, 200, 50, 0.6)) brightness(1.15);
 	}
@@ -1641,14 +1651,12 @@ body.watering-mode .pot-cell.has-plant:hover {
 	width: 100%;
 	height: 100%;
 	border-radius: 50%;
-	background: radial-gradient(
-		circle,
-		rgba(255, 215, 0, 0.4) 0%,
-		rgba(255, 215, 0, 0.2) 40%,
-		rgba(255, 215, 0, 0) 70%
-	);
+	background: radial-gradient(circle,
+			rgba(255, 215, 0, 0.4) 0%,
+			rgba(255, 215, 0, 0.2) 40%,
+			rgba(255, 215, 0, 0) 70%);
 	border: 3px solid rgba(255, 215, 0, 0.6);
-	box-shadow: 
+	box-shadow:
 		0 0 20px rgba(255, 215, 0, 0.8),
 		0 0 40px rgba(255, 215, 0, 0.5),
 		inset 0 0 20px rgba(255, 215, 0, 0.3);
@@ -1732,18 +1740,21 @@ body.watering-mode .pot-cell.has-plant:hover {
 }
 
 @keyframes hotspotRingPulse {
-	0%, 100% {
+
+	0%,
+	100% {
 		transform: scale(1);
 		opacity: 0.8;
-		box-shadow: 
+		box-shadow:
 			0 0 20px rgba(255, 215, 0, 0.8),
 			0 0 40px rgba(255, 215, 0, 0.5),
 			inset 0 0 20px rgba(255, 215, 0, 0.3);
 	}
+
 	50% {
 		transform: scale(1.3);
 		opacity: 0.4;
-		box-shadow: 
+		box-shadow:
 			0 0 30px rgba(255, 215, 0, 1),
 			0 0 60px rgba(255, 215, 0, 0.7),
 			inset 0 0 30px rgba(255, 215, 0, 0.4);
@@ -1971,7 +1982,9 @@ body.watering-mode .pot-cell.has-plant:hover {
 }
 
 @keyframes dismissHintPulse {
-	0%, 100% {
+
+	0%,
+	100% {
 		transform: scale(1);
 		box-shadow: 0 0 0 0 rgba(232, 168, 32, 0.4);
 	}
@@ -2311,56 +2324,86 @@ body.watering-mode .pot-cell.has-plant:hover {
 		font-size: 9px;
 	}
 }
+
 /* ─── Character Sprites (Nilame Ayya & Witch) ────────────────── */
 .character-sprite {
-position: absolute;
-bottom: 10%;
-width: 100px;
-height: 150px;
-background-size: contain;
-background-repeat: no-repeat;
-background-position: center bottom;
-cursor: pointer;
-z-index: 50;
-filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
-transition: transform 0.2s ease;
+	position: absolute;
+	bottom: 10%;
+	width: 100px;
+	height: 150px;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center bottom;
+	cursor: pointer;
+	z-index: 50;
+	filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+	transition: transform 0.2s ease;
 }
 
 .character-sprite:hover {
-transform: scale(1.08);
+	transform: scale(1.08);
 }
 
 /* Nilame Ayya — enters from the left */
 #nilame-ayya {
-left: 5%;
-background-image: url('../assets/images/narrator_open.png');
+	left: 5%;
+	background-image: url('../assets/images/narrator_open.png');
 }
 
 /* Witch — enters from the right, uses nona.png */
 #witch-character {
-right: 5%;
-background-image: url('../assets/images/nona.png');
-filter: drop-shadow(0 4px 8px rgba(180, 0, 180, 0.5)) hue-rotate(200deg);
+	right: 5%;
+	background-image: url('../assets/images/nona.png');
+	filter: drop-shadow(0 4px 8px rgba(180, 0, 180, 0.5)) hue-rotate(200deg);
 }
 
 @keyframes characterEnterLeft {
-from { transform: translateX(-120px); opacity: 0; }
-to   { transform: translateX(0);      opacity: 1; }
+	from {
+		transform: translateX(-120px);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
 }
 
 @keyframes characterEnterRight {
-from { transform: translateX(120px); opacity: 0; }
-to   { transform: translateX(0);     opacity: 1; }
+	from {
+		transform: translateX(120px);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
 }
 
 @keyframes characterExit {
-from { transform: translateX(0) scale(1); opacity: 1; }
-to   { transform: translateX(0) scale(0.5); opacity: 0; }
+	from {
+		transform: translateX(0) scale(1);
+		opacity: 1;
+	}
+
+	to {
+		transform: translateX(0) scale(0.5);
+		opacity: 0;
+	}
 }
 
-.nilame-enter  { animation: characterEnterLeft  0.5s ease forwards; }
-.witch-enter   { animation: characterEnterRight 0.5s ease forwards; }
-.character-exit { animation: characterExit 0.5s ease forwards; }
+.nilame-enter {
+	animation: characterEnterLeft 0.5s ease forwards;
+}
+
+.witch-enter {
+	animation: characterEnterRight 0.5s ease forwards;
+}
+
+.character-exit {
+	animation: characterExit 0.5s ease forwards;
+}
 
 /* ─── Auth Screen ─────────────────────────────────────────────── */
 #auth-screen {
@@ -2482,8 +2525,14 @@ to   { transform: translateX(0) scale(0.5); opacity: 0; }
 	margin-top: 4px;
 }
 
-.auth-btn:hover { background: #c86b00; }
-.auth-btn:disabled { background: #aaa; cursor: not-allowed; }
+.auth-btn:hover {
+	background: #c86b00;
+}
+
+.auth-btn:disabled {
+	background: #aaa;
+	cursor: not-allowed;
+}
 
 .auth-error {
 	color: #c0392b;
@@ -2492,7 +2541,9 @@ to   { transform: translateX(0) scale(0.5); opacity: 0; }
 	text-align: left;
 }
 
-.auth-error.hidden { display: none; }
+.auth-error.hidden {
+	display: none;
+}
 
 .auth-note {
 	font-size: 0.8rem;
@@ -2536,8 +2587,15 @@ to   { transform: translateX(0) scale(0.5); opacity: 0; }
 }
 
 @keyframes eggPulse {
-	0%, 100% { transform: scale(1); }
-	50% { transform: scale(1.08); }
+
+	0%,
+	100% {
+		transform: scale(1);
+	}
+
+	50% {
+		transform: scale(1.08);
+	}
 }
 
 #loading-text {
@@ -2813,9 +2871,12 @@ to   { transform: translateX(0) scale(0.5); opacity: 0; }
 }
 
 @keyframes pulse {
-	0%, 100% {
+
+	0%,
+	100% {
 		transform: scale(1);
 	}
+
 	50% {
 		transform: scale(1.05);
 	}
@@ -2867,22 +2928,22 @@ to   { transform: translateX(0) scale(0.5); opacity: 0; }
 
 /* ─── Logout Button ──────────────────────────────────────────── */
 #logout-btn {
-position: fixed;
-top: 10px;
-right: 10px;
-z-index: 9999;
-padding: 6px 12px;
-background: rgba(139, 69, 19, 0.85);
-color: #fff;
-border: 2px solid rgba(255, 255, 255, 0.4);
-border-radius: 20px;
-font-family: 'Crimson Text', serif;
-font-size: 0.9rem;
-cursor: pointer;
-transition: background 0.2s, transform 0.1s;
+	position: fixed;
+	top: 10px;
+	right: 10px;
+	z-index: 9999;
+	padding: 6px 12px;
+	background: rgba(139, 69, 19, 0.85);
+	color: #fff;
+	border: 2px solid rgba(255, 255, 255, 0.4);
+	border-radius: 20px;
+	font-family: 'Crimson Text', serif;
+	font-size: 0.9rem;
+	cursor: pointer;
+	transition: background 0.2s, transform 0.1s;
 }
 
 #logout-btn:hover {
-background: rgba(180, 60, 20, 0.95);
-transform: scale(1.05);
+	background: rgba(180, 60, 20, 0.95);
+	transform: scale(1.05);
 }
