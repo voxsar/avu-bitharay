@@ -9,14 +9,14 @@
 
 import { switchLevel, saveState, loadState, showMessage } from './main.js';
 import { initLevel1UI, updateProgressDisplay, showGameModal, showNarratorHelp } from './level1UI.js';
-import { TileMatchGame, RiddleGame, TofuHunterGame } from './miniGames.js';
+import { TileMatchGame, RiddleGame, TofuHunterGame, PhotoTileMatchGame } from './miniGames.js';
 import { saveLevel1Progress, saveGameProgress } from './api.js';
 import { showDialogue, findTriggeredNode, processChoice, getDialogueState, markNodeSeen } from './dialogue.js';
 import { DIALOGUE_NODES } from './dialogueData.js';
 
 // ─── Constants ────────────────────────────────────────────────
 const TOTAL_HOTSPOTS = 12;
-const GAME_TYPES = ['tilematch', 'riddle', 'tofuhunter'];
+const GAME_TYPES = ['tilematch', 'riddle', 'tofuhunter', 'photomatch'];
 const MAX_RETRIES = 2; // Allow 2 retries per game
 const SEEDS_TO_PROGRESS = 2; // Minimum seeds needed to unlock progression
 
@@ -193,6 +193,9 @@ function onHotspotClick(hotspotId) {
 			break;
 		case 'tofuhunter':
 			game = new TofuHunterGame();
+			break;
+		case 'photomatch':
+			game = new PhotoTileMatchGame();
 			break;
 		default:
 			console.error('Unknown game type:', hotspot.gameType);
