@@ -216,7 +216,8 @@ export function markNodeSeen(nodeId) {
 let isDialogueOpen = false;
 
 /**
- * Show a dialogue box with character portrait, message, and choices.
+ * Show a side-panel dialogue with character sprite, message, and choices.
+ * Nilame slides in from the left; Witch slides in from the right.
  * Only one dialogue may be open at a time.
  * @param {Object} node - Dialogue node to display
  * @param {Function} onChoice - Callback(choiceIndex, choice)
@@ -226,34 +227,40 @@ export function showDialogue(node, onChoice) {
 	isDialogueOpen = true;
 
 	const character = CHARACTERS[node.character] || CHARACTERS.system;
+	const isSystem = node.character === 'system';
+	const isWitch = node.character === 'witch';
 
-	// Build the portrait section if the character has an image
-	const portraitHTML = character.image
-		? `<img class="dialogue-character-portrait" src="${character.image}" alt="${character.name}" />`
-		: `<span class="dialogue-character-icon">${character.emoji}</span>`;
+	// Backdrop (dark overlay)
+	const backdrop = document.createElement('div');
+	backdrop.id = 'dialogue-backdrop';
+	document.body.appendChild(backdrop);
 
-	// Create dialogue overlay
-	const overlay = document.createElement('div');
-	overlay.id = 'dialogue-overlay';
-	overlay.className = 'dialogue-overlay';
+	// Main container (positioned bottom-left or bottom-right)
+	const container = document.createElement('div');
+	container.id = 'dialogue-container';
+	container.className = `dialogue-char-${node.character}`;
 
-	overlay.innerHTML = `
-		<div class="dialogue-box">
-			<div class="dialogue-header">
-				${portraitHTML}
-				<span class="dialogue-character-name" style="color: ${character.color}">${character.name}</span>
-			</div>
-			<div class="dialogue-content">
-				<p class="dialogue-text">${node.dialogue}</p>
-			</div>
+	// Character sprite (only for non-system characters)
+	const spriteHTML = !isSystem
+		? `<div class="dialogue-char-sprite dialogue-sprite-${node.character}"></div>`
+		: '';
+
+	// Bubble class controls which side the tail points toward
+	const bubbleClass = isWitch ? 'bubble-right' : 'bubble-left';
+
+	container.innerHTML = `
+		${spriteHTML}
+		<div class="dialogue-speech-bubble ${bubbleClass}">
+			<div class="dialogue-speaker-name" style="color: ${character.color}">${character.emoji} ${character.name}</div>
+			<p class="dialogue-text">${node.dialogue}</p>
 			<div class="dialogue-choices" id="dialogue-choices"></div>
 		</div>
 	`;
 
-	document.body.appendChild(overlay);
+	document.body.appendChild(container);
 
 	// Add choices
-	const choicesContainer = overlay.querySelector('#dialogue-choices');
+	const choicesContainer = container.querySelector('#dialogue-choices');
 	node.choices.forEach((choice, index) => {
 		const button = document.createElement('button');
 		button.className = 'dialogue-choice-btn';
@@ -270,12 +277,21 @@ export function showDialogue(node, onChoice) {
 }
 
 /**
- * Remove the dialogue overlay
+ * Remove the dialogue side panel with slide-out animation
  */
 export function removeDialogue() {
-	const overlay = document.getElementById('dialogue-overlay');
-	if (overlay) {
-		overlay.remove();
+	const container = document.getElementById('dialogue-container');
+	const backdrop = document.getElementById('dialogue-backdrop');
+
+	if (container) {
+		container.classList.add('sliding-out');
+		if (backdrop) backdrop.classList.add('fading-out');
+		setTimeout(() => {
+			if (container.parentNode) container.parentNode.removeChild(container);
+			if (backdrop && backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
+		}, 400);
+	} else {
+		if (backdrop && backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
 	}
 	isDialogueOpen = false;
 }

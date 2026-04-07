@@ -2522,106 +2522,178 @@ to   { transform: translateX(0) scale(0.5); opacity: 0; }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   DIALOGUE SYSTEM STYLES
+   DIALOGUE SYSTEM STYLES  (side-panel, like narrator)
    ═══════════════════════════════════════════════════════════ */
 
-.dialogue-overlay {
+/* Backdrop */
+#dialogue-backdrop {
 	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: rgba(0, 0, 0, 0.7);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	z-index: 10000;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.45);
+	z-index: 9999;
 	animation: fadeIn 0.3s ease;
 }
 
-@keyframes fadeIn {
-	from {
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-	}
+#dialogue-backdrop.fading-out {
+	animation: fadeOut 0.4s ease forwards;
 }
 
-.dialogue-box {
-	background: var(--bubble-bg);
-	border: 3px solid var(--bubble-border);
-	border-radius: 15px;
-	padding: 30px;
-	max-width: 600px;
-	width: 90%;
-	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-	animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-	from {
-		transform: translateY(50px);
-		opacity: 0;
-	}
-	to {
-		transform: translateY(0);
-		opacity: 1;
-	}
-}
-
-.dialogue-header {
+/* ── Side-panel container ──────────────────────────────── */
+#dialogue-container {
+	position: fixed;
+	bottom: 5%;
 	display: flex;
+	align-items: flex-end;
+	gap: 12px;
+	z-index: 10000;
+}
+
+/* Nilame → bottom-left, character on left, bubble on right */
+#dialogue-container.dialogue-char-nilame {
+	left: -5%;
+	flex-direction: row;
+	animation: dialogueSlideInLeft 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#dialogue-container.dialogue-char-nilame.sliding-out {
+	animation: dialogueSlideOutLeft 0.4s ease forwards;
+}
+
+/* Witch → bottom-right, character on right, bubble on left */
+#dialogue-container.dialogue-char-witch {
+	right: -5%;
+	flex-direction: row-reverse;
+	animation: dialogueSlideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#dialogue-container.dialogue-char-witch.sliding-out {
+	animation: dialogueSlideOutRight 0.4s ease forwards;
+}
+
+/* System → bottom-center, no sprite */
+#dialogue-container.dialogue-char-system {
+	left: 50%;
+	transform: translateX(-50%);
+	flex-direction: column;
 	align-items: center;
-	gap: 10px;
-	margin-bottom: 20px;
-	padding-bottom: 15px;
-	border-bottom: 2px solid var(--bubble-border);
+	animation: dialogueSlideInBottom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.dialogue-character-icon {
-	font-size: 2rem;
+#dialogue-container.dialogue-char-system.sliding-out {
+	animation: dialogueSlideOutBottom 0.4s ease forwards;
 }
 
-.dialogue-character-portrait {
-	width: 72px;
-	height: 90px;
-	object-fit: cover;
-	border-radius: 8px;
-	border: 2px solid var(--bubble-border);
+/* ── Character sprite ──────────────────────────────────── */
+.dialogue-char-sprite {
+	width: clamp(140px, 18vw, 300px);
+	height: clamp(230px, 30vw, 500px);
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: bottom center;
+	filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6));
 	flex-shrink: 0;
 }
 
-.dialogue-character-name {
-	font-family: 'Cinzel Decorative', serif;
-	font-size: 1.5rem;
-	font-weight: 700;
+.dialogue-sprite-nilame {
+	background-image: url('../assets/images/narrator_open.png');
 }
 
-.dialogue-content {
-	margin-bottom: 25px;
+.dialogue-sprite-witch {
+	background-image: url('../assets/images/nona.png');
+}
+
+/* ── Speech bubble ─────────────────────────────────────── */
+.dialogue-speech-bubble {
+	position: relative;
+	background: var(--parchment);
+	border: 3px solid var(--bubble-border);
+	border-radius: 16px;
+	padding: 18px 22px;
+	max-width: min(420px, 55vw);
+	min-width: 220px;
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Tail pointing left (toward a left-side character) */
+.dialogue-speech-bubble.bubble-left::before {
+	content: '';
+	position: absolute;
+	left: -13px;
+	bottom: 24px;
+	width: 0;
+	height: 0;
+	border-top: 10px solid transparent;
+	border-bottom: 10px solid transparent;
+	border-right: 13px solid var(--bubble-border);
+}
+
+.dialogue-speech-bubble.bubble-left::after {
+	content: '';
+	position: absolute;
+	left: -9px;
+	bottom: 25px;
+	width: 0;
+	height: 0;
+	border-top: 9px solid transparent;
+	border-bottom: 9px solid transparent;
+	border-right: 11px solid var(--parchment);
+}
+
+/* Tail pointing right (toward a right-side character) */
+.dialogue-speech-bubble.bubble-right::before {
+	content: '';
+	position: absolute;
+	right: -13px;
+	bottom: 24px;
+	width: 0;
+	height: 0;
+	border-top: 10px solid transparent;
+	border-bottom: 10px solid transparent;
+	border-left: 13px solid var(--bubble-border);
+}
+
+.dialogue-speech-bubble.bubble-right::after {
+	content: '';
+	position: absolute;
+	right: -9px;
+	bottom: 25px;
+	width: 0;
+	height: 0;
+	border-top: 9px solid transparent;
+	border-bottom: 9px solid transparent;
+	border-left: 11px solid var(--parchment);
+}
+
+.dialogue-speaker-name {
+	font-family: 'Cinzel Decorative', serif;
+	font-size: clamp(13px, 1.3vw, 18px);
+	font-weight: 700;
+	margin-bottom: 10px;
+	padding-bottom: 8px;
+	border-bottom: 2px solid var(--bubble-border);
 }
 
 .dialogue-text {
 	font-family: 'Crimson Text', serif;
-	font-size: 1.2rem;
+	font-size: clamp(13px, 1.2vw, 17px);
 	line-height: 1.6;
 	color: #2a2a2a;
+	margin-bottom: 16px;
 }
 
 .dialogue-choices {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 8px;
 }
 
 .dialogue-choice-btn {
 	background: linear-gradient(to bottom, var(--gold-light), var(--gold));
 	border: 2px solid var(--brown);
 	border-radius: 8px;
-	padding: 15px 20px;
+	padding: 10px 16px;
 	font-family: 'Crimson Text', serif;
-	font-size: 1.1rem;
+	font-size: clamp(12px, 1.1vw, 16px);
 	font-weight: 600;
 	color: var(--brown);
 	text-align: left;
@@ -2631,12 +2703,43 @@ to   { transform: translateX(0) scale(0.5); opacity: 0; }
 
 .dialogue-choice-btn:hover {
 	background: linear-gradient(to bottom, #fff, var(--gold-light));
-	transform: translateX(5px);
+	transform: translateX(4px);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .dialogue-choice-btn:active {
-	transform: translateX(5px) scale(0.98);
+	transform: translateX(4px) scale(0.98);
+}
+
+/* ── Slide animations ──────────────────────────────────── */
+@keyframes dialogueSlideInLeft {
+	from { transform: translateX(-150%); opacity: 0; }
+	to   { transform: translateX(0);     opacity: 1; }
+}
+
+@keyframes dialogueSlideOutLeft {
+	from { transform: translateX(0);     opacity: 1; }
+	to   { transform: translateX(-150%); opacity: 0; }
+}
+
+@keyframes dialogueSlideInRight {
+	from { transform: translateX(150%);  opacity: 0; }
+	to   { transform: translateX(0);     opacity: 1; }
+}
+
+@keyframes dialogueSlideOutRight {
+	from { transform: translateX(0);     opacity: 1; }
+	to   { transform: translateX(150%);  opacity: 0; }
+}
+
+@keyframes dialogueSlideInBottom {
+	from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+	to   { transform: translateX(-50%) translateY(0);     opacity: 1; }
+}
+
+@keyframes dialogueSlideOutBottom {
+	from { transform: translateX(-50%) translateY(0);     opacity: 1; }
+	to   { transform: translateX(-50%) translateY(100px); opacity: 0; }
 }
 
 /* Progress unlock button */
