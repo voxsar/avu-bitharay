@@ -554,16 +554,16 @@ export class TofuHunterGame {
  * 10 images → 5×4 grid (20 tiles, 10 pairs).
  */
 const PEOPLE_IMAGES = [
-	'assets/images/people/person1.svg',
-	'assets/images/people/person2.svg',
-	'assets/images/people/person3.svg',
-	'assets/images/people/person4.svg',
-	'assets/images/people/person5.svg',
-	'assets/images/people/person6.svg',
-	'assets/images/people/person7.svg',
-	'assets/images/people/person8.svg',
-	'assets/images/people/person9.svg',
-	'assets/images/people/person10.svg',
+	'assets/images/people/akhila.png',
+	'assets/images/people/ali.jpg',
+	'assets/images/people/aruni.jpg',
+	'assets/images/people/avindya.jpg',
+	'assets/images/people/aviska.jpg',
+	'assets/images/people/chamathka.jpg',
+	'assets/images/people/harshani.png',
+	'assets/images/people/idusha.jpg',
+	'assets/images/people/inuri.jpg',
+	'assets/images/people/ishrah.jpg',
 ];
 
 export class PhotoTileMatchGame {
