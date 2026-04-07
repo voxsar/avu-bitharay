@@ -800,40 +800,6 @@ function init() {
 	// ── Message close (already wired per call) ──
 	// (see showMessage above)
 
-	// ── Debug controls ──
-	$('debug-next-day').addEventListener('click', () => {
-		if (state.phase !== 'playing') return;
-
-		// Check completion level based on daily progress
-		const pct = getDailyProgress(state);
-		const completionLevel = pct >= 100 ? 'complete' : pct > 0 ? 'partial' : 'none';
-		applyHealthDelta(state, completionLevel);
-		if (pct >= 100) state.streak++;
-		else if (pct < 50) state.streak = 0;
-
-		state.currentDay = Math.min(TOTAL_DAYS, state.currentDay + 1);
-		state.dailyActions = { plantsPlanted: 0, plantsWatered: 0, drumsPlayed: 0, crowsChased: 0 };
-		state.todayComplete = false;
-		state.eggGlowing = false;
-		state.seedsUsedToday = 0;
-		state.poisPlayedToday = 0;
-		state.witchOfferedSeedsToday = false;
-
-		if (state.eggHealth <= 0) state.phase = 'gameover';
-		else if (state.currentDay >= TOTAL_DAYS && state.todayComplete) state.phase = 'hatched';
-
-		saveState(state);
-		updateUI(state);
-		checkEndStates(state);
-	});
-
-	$('debug-reset').addEventListener('click', () => {
-		state = makeDefaultState();
-		saveState(state);
-		updateUI(state);
-		$('message-overlay').classList.add('hidden');
-	});
-
 	// Ctrl+D → toggle debug panel
 	document.addEventListener('keydown', e => {
 		if (e.ctrlKey && e.key === 'd') {
