@@ -30,6 +30,14 @@ function saveLocalPlayer(player) {
 	}));
 }
 
+/**
+ * Log out the current player by clearing the stored credentials.
+ * After calling this the page should be reloaded to show the auth screen.
+ */
+export function logoutPlayer() {
+	localStorage.removeItem(PLAYER_KEY);
+}
+
 // ─── Player login ─────────────────────────────────────────────
 /**
  * Log in with username + password. Returns a signed JWT stored in localStorage.

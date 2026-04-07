@@ -21,7 +21,7 @@ import './plantDebug.js'; // Debug helpers for testing plants
 import { plantInPot } from './plantDebug.js';
 import { initLevel1, setLevel1StateCache } from './level1.js';
 import './level1Debug.js'; // Debug helpers for Level 1
-import { getLocalPlayer, loginPlayer, registerPlayer, loadAllProgress, saveGameProgress, submitScore, computeScore } from './api.js';
+import { getLocalPlayer, loginPlayer, registerPlayer, loadAllProgress, saveGameProgress, submitScore, computeScore, logoutPlayer } from './api.js';
 import { setPlantStateCache } from './plants.js';
 import { initDialogueState, getDialogueState, showDialogue, findTriggeredNode, processChoice } from './dialogue.js';
 import { DIALOGUE_NODES } from './dialogueData.js';
@@ -714,6 +714,17 @@ function init() {
 	// Reveal game wrapper now that auth + loading are complete
 	const gameWrapper = $('game-wrapper');
 	if (gameWrapper) gameWrapper.classList.remove('hidden');
+
+	// Wire logout button
+	const logoutBtn = $('logout-btn');
+	if (logoutBtn) {
+		logoutBtn.addEventListener('click', () => {
+			if (confirm('Are you sure you want to log out?')) {
+				logoutPlayer();
+				location.reload();
+			}
+		});
+	}
 
 	let state = loadState();
 	const today = todayISO();

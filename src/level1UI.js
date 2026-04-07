@@ -80,7 +80,8 @@ function getTooltipText(hotspot) {
 	const gameTypeText = {
 		'tilematch': '🎴 Tile Match',
 		'riddle': '❓ Riddle',
-		'tofuhunter': '🎮 Tofu Hunter'
+		'tofuhunter': '🎮 Tofu Hunter',
+		'photomatch': '🖼️ Photo Match'
 	}[hotspot.gameType] || 'Game';
 
 	if (hotspot.state === 'available') {

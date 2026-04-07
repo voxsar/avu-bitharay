@@ -2716,3 +2716,26 @@ to   { transform: translateX(0) scale(0.5); opacity: 0; }
 	font-weight: 700;
 }
 
+
+
+/* ─── Logout Button ──────────────────────────────────────────── */
+#logout-btn {
+position: fixed;
+top: 10px;
+right: 10px;
+z-index: 9999;
+padding: 6px 12px;
+background: rgba(139, 69, 19, 0.85);
+color: #fff;
+border: 2px solid rgba(255, 255, 255, 0.4);
+border-radius: 20px;
+font-family: 'Crimson Text', serif;
+font-size: 0.9rem;
+cursor: pointer;
+transition: background 0.2s, transform 0.1s;
+}
+
+#logout-btn:hover {
+background: rgba(180, 60, 20, 0.95);
+transform: scale(1.05);
+}
