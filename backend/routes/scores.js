@@ -50,34 +50,42 @@ if (typeof score !== 'number' || score < 0) {
 return res.status(400).json({ error: 'score must be a non-negative number' });
 }
 
-const insert = db.prepare(`
+try {
+	const insert = db.prepare(`
     INSERT INTO scores (player_id, score, day_reached, egg_health, coins_gold, coins_red, coins_silver, phase)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
-const result = insert.run(
-payload.sub,
-Math.round(score),
-clamp(dayReached, 1, 14),
-clamp(eggHealth, 0, 100),
-clamp(coinsGold, 0, 99999),
-clamp(coinsRed, 0, 99999),
-clamp(coinsSilver, 0, 99999),
-['playing', 'hatched', 'gameover'].includes(phase) ? phase : 'gameover'
-);
+	const result = insert.run(
+	payload.sub,
+	Math.round(score),
+	clamp(dayReached, 1, 14),
+	clamp(eggHealth, 0, 100),
+	clamp(coinsGold, 0, 99999),
+	clamp(coinsRed, 0, 99999),
+	clamp(coinsSilver, 0, 99999),
+	['playing', 'hatched', 'gameover'].includes(phase) ? phase : 'gameover'
+	);
 
-// Find rank of this submission
-const rankRow = db.prepare(`
+	// Find rank of this submission
+	const rankRow = db.prepare(`
     SELECT COUNT(*) + 1 AS rank
     FROM scores
     WHERE score > ? OR (score = ? AND egg_health > ?)
   `).get(Math.round(score), Math.round(score), clamp(eggHealth, 0, 100));
 
-return res.status(201).json({
-scoreId: result.lastInsertRowid,
-rank: rankRow?.rank || 1,
-message: 'Score submitted successfully'
-});
+	return res.status(201).json({
+	scoreId: result.lastInsertRowid,
+	rank: rankRow?.rank || 1,
+	message: 'Score submitted successfully'
+	});
+} catch (err) {
+	if (err.message.includes('FOREIGN KEY constraint')) {
+		return res.status(410).json({ error: 'Player account no longer exists. Please register again.' });
+	}
+	console.error(err.message);
+	return res.status(500).json({ error: 'Database error' });
+}
 });
 
 // ─── GET /api/scores/player/:id ───────────────────────────────

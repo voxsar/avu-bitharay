@@ -42,7 +42,8 @@ router.put('/game', requirePlayer, (req, res) => {
 		return res.status(400).json({ error: 'state must be an object' });
 	}
 
-	db.prepare(`
+	try {
+		db.prepare(`
     INSERT INTO game_progress (player_id, state_json, updated_at)
     VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
     ON CONFLICT(player_id) DO UPDATE SET
@@ -50,7 +51,14 @@ router.put('/game', requirePlayer, (req, res) => {
       updated_at = excluded.updated_at
   `).run(req.playerId, JSON.stringify(state));
 
-	return res.json({ ok: true });
+		return res.json({ ok: true });
+	} catch (err) {
+		if (err.message.includes('FOREIGN KEY constraint')) {
+			return res.status(410).json({ error: 'Player account no longer exists. Please register again.' });
+		}
+		console.error(err.message);
+		return res.status(500).json({ error: 'Database error' });
+	}
 });
 
 // ─── PUT /api/progress/level1 ─────────────────────────────────
@@ -60,7 +68,8 @@ router.put('/level1', requirePlayer, (req, res) => {
 		return res.status(400).json({ error: 'state must be an object' });
 	}
 
-	db.prepare(`
+	try {
+		db.prepare(`
     INSERT INTO level1_progress (player_id, state_json, updated_at)
     VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
     ON CONFLICT(player_id) DO UPDATE SET
@@ -68,7 +77,14 @@ router.put('/level1', requirePlayer, (req, res) => {
       updated_at = excluded.updated_at
   `).run(req.playerId, JSON.stringify(state));
 
-	return res.json({ ok: true });
+		return res.json({ ok: true });
+	} catch (err) {
+		if (err.message.includes('FOREIGN KEY constraint')) {
+			return res.status(410).json({ error: 'Player account no longer exists. Please register again.' });
+		}
+		console.error(err.message);
+		return res.status(500).json({ error: 'Database error' });
+	}
 });
 
 // ─── PUT /api/progress/plants ─────────────────────────────────
@@ -78,7 +94,8 @@ router.put('/plants', requirePlayer, (req, res) => {
 		return res.status(400).json({ error: 'state must be an array' });
 	}
 
-	db.prepare(`
+	try {
+		db.prepare(`
     INSERT INTO plant_progress (player_id, state_json, updated_at)
     VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
     ON CONFLICT(player_id) DO UPDATE SET
@@ -86,7 +103,14 @@ router.put('/plants', requirePlayer, (req, res) => {
       updated_at = excluded.updated_at
   `).run(req.playerId, JSON.stringify(state));
 
-	return res.json({ ok: true });
+		return res.json({ ok: true });
+	} catch (err) {
+		if (err.message.includes('FOREIGN KEY constraint')) {
+			return res.status(410).json({ error: 'Player account no longer exists. Please register again.' });
+		}
+		console.error(err.message);
+		return res.status(500).json({ error: 'Database error' });
+	}
 });
 
 module.exports = router;
