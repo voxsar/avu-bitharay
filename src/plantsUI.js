@@ -24,8 +24,8 @@ export function initPlantUI() {
 	potState = loadPlantState();
 	console.log('Loaded potState:', potState);
 
-	// Auto-populate with test plants if garden is empty (for testing)
-	autoPopulateTestGarden();
+	// REMOVED: Auto-populate test garden - players should start with empty pots
+	// autoPopulateTestGarden();
 
 	setupEventListeners();
 	renderAllPots();
@@ -66,8 +66,8 @@ function autoPopulateTestGarden() {
 			const randomPlant = plantTypes[i % plantTypes.length];
 			potState[potIndex].plantType = randomPlant;
 			potState[potIndex].stage = 0;
-			potState[potIndex].waterings = 0;
-			potState[potIndex].lastWatered = null;
+			potState[potIndex].wateringsToday = 0;
+			potState[potIndex].lastWateredDate = null;
 		});
 
 		savePlantState(potState);
@@ -147,7 +147,7 @@ function renderPot(cell, potIndex) {
 		for (let i = 0; i < 3; i++) {
 			const dot = document.createElement('div');
 			dot.className = 'watering-dot';
-			if (i < pot.waterings) {
+			if (i < pot.wateringsToday) {
 				dot.classList.add('filled');
 			}
 			wateringDots.appendChild(dot);
@@ -386,7 +386,7 @@ export function debugPlantRandom() {
 
 	potState[emptyIndex].plantType = randomType;
 	potState[emptyIndex].stage = 0;
-	potState[emptyIndex].waterings = 0;
+	potState[emptyIndex].wateringsToday = 0;
 
 	savePlantState(potState);
 	renderAllPots();

@@ -1203,10 +1203,28 @@ body.watering-mode {
 	cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none"><circle cx="16" cy="16" r="8" fill="rgba(100,180,255,0.3)" stroke="rgba(50,150,255,0.8)" stroke-width="2"/></svg>') 16 16, auto;
 }
 
+/* Highlight ALL pots (including empty) in watering mode */
+body.watering-mode .pot-cell {
+	cursor: pointer;
+	outline: 3px solid rgba(100, 180, 255, 0.6);
+	outline-offset: 4px;
+	border-radius: 8px;
+	transition: all 0.3s ease;
+}
+
 body.watering-mode .pot-cell.has-plant:hover {
 	cursor: pointer;
-	filter: drop-shadow(0 6px 16px rgba(100, 180, 255, 0.5));
-	transform: scale(1.05);
+	filter: drop-shadow(0 6px 20px rgba(100, 180, 255, 0.8));
+	transform: scale(1.08);
+	outline: 4px solid rgba(100, 200, 255, 1);
+	outline-offset: 6px;
+}
+
+/* Also highlight empty pots on hover in watering mode */
+body.watering-mode .pot-cell.empty:hover {
+	filter: drop-shadow(0 6px 16px rgba(255, 100, 100, 0.4));
+	outline: 3px solid rgba(255, 100, 100, 0.7);
+	transform: scale(1.03);
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -2815,33 +2833,75 @@ body.watering-mode .pot-cell.has-plant:hover {
 
 /* ── Slide animations ──────────────────────────────────── */
 @keyframes dialogueSlideInLeft {
-	from { transform: translateX(-150%); opacity: 0; }
-	to   { transform: translateX(0);     opacity: 1; }
+	from {
+		transform: translateX(-150%);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
 }
 
 @keyframes dialogueSlideOutLeft {
-	from { transform: translateX(0);     opacity: 1; }
-	to   { transform: translateX(-150%); opacity: 0; }
+	from {
+		transform: translateX(0);
+		opacity: 1;
+	}
+
+	to {
+		transform: translateX(-150%);
+		opacity: 0;
+	}
 }
 
 @keyframes dialogueSlideInRight {
-	from { transform: translateX(150%);  opacity: 0; }
-	to   { transform: translateX(0);     opacity: 1; }
+	from {
+		transform: translateX(150%);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
 }
 
 @keyframes dialogueSlideOutRight {
-	from { transform: translateX(0);     opacity: 1; }
-	to   { transform: translateX(150%);  opacity: 0; }
+	from {
+		transform: translateX(0);
+		opacity: 1;
+	}
+
+	to {
+		transform: translateX(150%);
+		opacity: 0;
+	}
 }
 
 @keyframes dialogueSlideInBottom {
-	from { transform: translateX(-50%) translateY(100px); opacity: 0; }
-	to   { transform: translateX(-50%) translateY(0);     opacity: 1; }
+	from {
+		transform: translateX(-50%) translateY(100px);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateX(-50%) translateY(0);
+		opacity: 1;
+	}
 }
 
 @keyframes dialogueSlideOutBottom {
-	from { transform: translateX(-50%) translateY(0);     opacity: 1; }
-	to   { transform: translateX(-50%) translateY(100px); opacity: 0; }
+	from {
+		transform: translateX(-50%) translateY(0);
+		opacity: 1;
+	}
+
+	to {
+		transform: translateX(-50%) translateY(100px);
+		opacity: 0;
+	}
 }
 
 /* Progress unlock button */
@@ -2946,4 +3006,30 @@ body.watering-mode .pot-cell.has-plant:hover {
 #logout-btn:hover {
 	background: rgba(180, 60, 20, 0.95);
 	transform: scale(1.05);
+}
+
+/* Back to Egg button (in Level 1) */
+#back-to-egg-btn {
+	position: fixed;
+	top: 10px;
+	left: 10px;
+	z-index: 9999;
+	padding: 8px 16px;
+	background: linear-gradient(135deg, rgba(100, 180, 255, 0.9), rgba(80, 140, 220, 0.9));
+	color: white;
+	border: 2px solid rgba(255, 255, 255, 0.6);
+	border-radius: 20px;
+	font-family: 'Crimson Text', serif;
+	font-size: 0.95rem;
+	font-weight: bold;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+#back-to-egg-btn:hover {
+	background: linear-gradient(135deg, rgba(120, 200, 255, 1), rgba(100, 160, 240, 1));
+	border-color: rgba(255, 255, 255, 0.9);
+	transform: scale(1.08) translateY(-2px);
+	box-shadow: 0 6px 15px rgba(100, 180, 255, 0.6);
 }

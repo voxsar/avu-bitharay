@@ -44,10 +44,15 @@ export const PLANT_CONFIG = {
 // ─── Constants ────────────────────────────────────────────────
 const TOTAL_POTS = 9;
 const TOTAL_STAGES = 7;  // Stages 0-6
-const WATERINGS_PER_STAGE = 3;
+const WATERINGS_PER_DAY = 3;  // Must water 3 times per day
 
 function makeEmptyPot() {
-	return { plantType: null, stage: 0, waterings: 0, lastWatered: null };
+	return {
+		plantType: null,
+		stage: 0,
+		wateringsToday: 0,  // Daily watering counter (0-3)
+		lastWateredDate: null  // Track which day we last watered
+	};
 }
 
 function makeDefaultPotState() {
@@ -64,13 +69,26 @@ let _plantStateCache = null;
  */
 export function setPlantStateCache(pots) {
 	if (Array.isArray(pots) && pots.length === TOTAL_POTS) {
-		// Sanitise invalid plant types
+		// Sanitise invalid plant types and migrate old structure
 		pots.forEach(pot => {
 			if (pot.plantType && !PLANT_CONFIG[pot.plantType]) {
 				pot.plantType = null;
 				pot.stage = 0;
-				pot.waterings = 0;
-				pot.lastWatered = null;
+				pot.wateringsToday = 0;
+				pot.lastWateredDate = null;
+			}
+			// Migrate old 'waterings' field to 'wateringsToday'
+			if (pot.waterings !== undefined) {
+				pot.wateringsToday = pot.waterings || 0;
+				delete pot.waterings;
+			}
+			// Ensure new fields exist
+			if (pot.wateringsToday === undefined) pot.wateringsToday = 0;
+			if (pot.lastWateredDate === undefined) pot.lastWateredDate = null;
+			// Migrate old 'lastWatered' to 'lastWateredDate'
+			if (pot.lastWatered && !pot.lastWateredDate) {
+				pot.lastWateredDate = pot.lastWatered.split('T')[0]; // Extract date only
+				delete pot.lastWatered;
 			}
 		});
 		_plantStateCache = pots;
@@ -117,39 +135,39 @@ export function waterPot(potState, potIndex) {
 		};
 	}
 
-	// Add watering
-	pot.waterings++;
-	pot.lastWatered = new Date().toISOString();
+	// Check if already watered 3 times today
+	const today = new Date().toISOString().split('T')[0];
 
-	// Check if stage should advance
-	if (pot.waterings >= WATERINGS_PER_STAGE) {
-		pot.stage++;
-		pot.waterings = 0;
+	if (pot.lastWateredDate !== today) {
+		// New day - reset daily counter
+		pot.wateringsToday = 0;
+		pot.lastWateredDate = today;
+	}
 
-		const plantName = PLANT_CONFIG[pot.plantType].name;
-
-		if (pot.stage >= TOTAL_STAGES - 1) {
-			return {
-				success: true,
-				stageUp: true,
-				fullyGrown: true,
-				message: `🌺 Your ${plantName} is fully grown!`
-			};
-		}
-
+	if (pot.wateringsToday >= WATERINGS_PER_DAY) {
 		return {
-			success: true,
-			stageUp: true,
-			fullyGrown: false,
-			message: `🌱 Your ${plantName} grew to stage ${pot.stage + 1}!`
+			success: false,
+			message: `💧 Already watered 3 times today! This plant will grow tomorrow.`
 		};
 	}
 
-	const remaining = WATERINGS_PER_STAGE - pot.waterings;
+	// Add watering for today
+	pot.wateringsToday++;
+
+	const plantName = PLANT_CONFIG[pot.plantType].name;
+	const remaining = WATERINGS_PER_DAY - pot.wateringsToday;
+	const daysToGrow = (TOTAL_STAGES - 1 - pot.stage);
+
+	if (pot.wateringsToday >= WATERINGS_PER_DAY) {
+		return {
+			success: true,
+			message: `💧 Watered! (3/3 today) ✓ Your ${plantName} will grow tomorrow! (${daysToGrow} more day${daysToGrow !== 1 ? 's' : ''} to fully grow)`
+		};
+	}
+
 	return {
 		success: true,
-		stageUp: false,
-		message: `💧 Watered! ${remaining} more watering${remaining !== 1 ? 's' : ''} needed for next stage.`
+		message: `💧 Watered! ${remaining} more watering${remaining !== 1 ? 's' : ''} needed today (${pot.wateringsToday}/3)`
 	};
 }
 
@@ -179,12 +197,12 @@ export function plantSeed(potState, potIndex, plantType) {
 	// Plant the seed (starts at stage 0)
 	pot.plantType = plantType;
 	pot.stage = 0;
-	pot.waterings = 0;
-	pot.lastWatered = null;
+	pot.wateringsToday = 0;
+	pot.lastWateredDate = null;
 
 	return {
 		success: true,
-		message: `🌱 Planted a ${PLANT_CONFIG[plantType].name} seed!`
+		message: `🌱 Planted a ${PLANT_CONFIG[plantType].name} seed! Water it 3 times daily to help it grow.`
 	};
 }
 
@@ -208,8 +226,8 @@ export function harvestPlant(potState, potIndex) {
 	// Reset pot to empty
 	pot.plantType = null;
 	pot.stage = 0;
-	pot.waterings = 0;
-	pot.lastWatered = null;
+	pot.wateringsToday = 0;
+	pot.lastWateredDate = null;
 
 	return {
 		success: true,
@@ -218,6 +236,41 @@ export function harvestPlant(potState, potIndex) {
 			? `✂️ Harvested a beautiful ${plantName}!`
 			: `✂️ Removed the ${plantName}.`
 	};
+}
+
+/**
+ * Process daily plant growth during day rollover
+ * Called when a new day starts
+ * @param {Array} potState - The plant pots state
+ * @param {string} yesterday - ISO date string for yesterday (YYYY-MM-DD)
+ * @returns {Array} Array of growth messages for plants that grew
+ */
+export function processDailyPlantGrowth(potState, yesterday) {
+	const growthMessages = [];
+
+	potState.forEach((pot, index) => {
+		if (!pot.plantType) return; // Skip empty pots
+		if (pot.stage >= TOTAL_STAGES - 1) return; // Skip fully grown plants
+
+		// Check if this plant was watered 3 times yesterday
+		if (pot.lastWateredDate === yesterday && pot.wateringsToday >= WATERINGS_PER_DAY) {
+			// Advance to next stage
+			pot.stage++;
+			const plantName = PLANT_CONFIG[pot.plantType].name;
+
+			if (pot.stage >= TOTAL_STAGES - 1) {
+				growthMessages.push(`🌺 Your ${plantName} is fully grown! All 7 stages complete! 🎉`);
+			} else {
+				const daysRemaining = (TOTAL_STAGES - 1) - pot.stage;
+				growthMessages.push(`🌱 Your ${plantName} grew to stage ${pot.stage + 1}! (${daysRemaining} more day${daysRemaining !== 1 ? 's' : ''} to fully grow)`);
+			}
+		}
+
+		// Reset daily watering counter for new day
+		pot.wateringsToday = 0;
+	});
+
+	return growthMessages;
 }
 
 // ─── Helper Functions ─────────────────────────────────────────
@@ -230,7 +283,7 @@ export function getPotInfo(pot) {
 			isEmpty: true,
 			plantName: 'Empty',
 			stage: 0,
-			waterings: 0,
+			wateringsToday: 0,
 			progress: 0,
 			isFullyGrown: false
 		};
@@ -245,21 +298,22 @@ export function getPotInfo(pot) {
 			isEmpty: true,
 			plantName: 'Empty',
 			stage: 0,
-			waterings: 0,
+			wateringsToday: 0,
 			progress: 0,
 			isFullyGrown: false
 		};
 	}
 
 	const isFullyGrown = pot.stage >= TOTAL_STAGES - 1;
-	const totalProgress = ((pot.stage * WATERINGS_PER_STAGE + pot.waterings) / (TOTAL_STAGES * WATERINGS_PER_STAGE)) * 100;
+	// Progress based on stages (0-6), each stage is ~14.3% of total growth
+	const totalProgress = (pot.stage / (TOTAL_STAGES - 1)) * 100;
 
 	return {
 		isEmpty: false,
 		plantName: config.name,
 		plantType: pot.plantType,
 		stage: pot.stage,
-		waterings: pot.waterings,
+		wateringsToday: pot.wateringsToday || 0,
 		progress: Math.min(100, totalProgress),
 		isFullyGrown,
 		color: config.color,

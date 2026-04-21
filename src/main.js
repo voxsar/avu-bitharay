@@ -22,7 +22,7 @@ import { plantInPot } from './plantDebug.js';
 import { initLevel1, setLevel1StateCache } from './level1.js';
 import './level1Debug.js'; // Debug helpers for Level 1
 import { getLocalPlayer, loginPlayer, registerPlayer, loadAllProgress, saveGameProgress, submitScore, computeScore, logoutPlayer } from './api.js';
-import { setPlantStateCache } from './plants.js';
+import { setPlantStateCache, loadPlantState, savePlantState, processDailyPlantGrowth } from './plants.js';
 import { initDialogueState, getDialogueState, showDialogue, findTriggeredNode, processChoice } from './dialogue.js';
 import { DIALOGUE_NODES } from './dialogueData.js';
 import {
@@ -122,6 +122,7 @@ function processNewDays(state) {
 	if (state.lastVisitDate === today) return state; // same day — nothing to do
 
 	const daysMissed = daysBetween(state.lastVisitDate, today);
+	const yesterday = state.lastVisitDate; // Keep track of yesterday for plant growth
 
 	// Process the LAST recorded day first (was it completed?)
 	const wasComplete = state.todayComplete;
@@ -144,6 +145,15 @@ function processNewDays(state) {
 	const newDay = Math.min(TOTAL_DAYS, state.currentDay + daysMissed);
 	state.currentDay = newDay;
 	state.lastVisitDate = today;
+
+	// Process plant growth from yesterday
+	const plantState = loadPlantState();
+	const growthMessages = processDailyPlantGrowth(plantState, yesterday);
+	if (growthMessages.length > 0) {
+		savePlantState(plantState);
+		// Store messages to show after new day message
+		state._plantGrowthMessages = growthMessages;
+	}
 
 	// Reset daily state
 	state.dailyActions = {
@@ -599,13 +609,19 @@ function maybeShowNewDayMessage(state, wasNewDay, missedDays) {
 		);
 	} else {
 		if (state.currentDay <= TOTAL_DAYS && state.phase === 'playing') {
-			showMessage(
-				'🌅',
-				`<strong>Day ${state.currentDay} of ${TOTAL_DAYS}!</strong><br>
+			let message = `<strong>Day ${state.currentDay} of ${TOTAL_DAYS}!</strong><br>
          The sun rises on a new morning.<br>
-         <em>Complete your 4 daily actions to nurture the egg!</em>`,
-				null
-			);
+         <em>Complete your 4 daily actions to nurture the egg!</em>`;
+
+			// Add plant growth messages if any
+			if (state._plantGrowthMessages && state._plantGrowthMessages.length > 0) {
+				message += '<br><br><hr style="margin: 10px 0; border-color: rgba(255,255,255,0.2);">';
+				message += '<strong>🌱 Plant Growth:</strong><br>';
+				message += state._plantGrowthMessages.join('<br>');
+				delete state._plantGrowthMessages; // Clean up
+			}
+
+			showMessage('🌅', message, null);
 		}
 	}
 }

@@ -144,6 +144,18 @@ export function initLevel1(mainState) {
 	initLevel1UI(level1State, onHotspotClick);
 	updateProgressDisplay(level1State);
 
+	// Wire up "Back to Egg" button
+	const backToEggBtn = document.getElementById('back-to-egg-btn');
+	if (backToEggBtn) {
+		// Remove any existing listeners
+		const newBtn = backToEggBtn.cloneNode(true);
+		backToEggBtn.parentNode.replaceChild(newBtn, backToEggBtn);
+
+		newBtn.addEventListener('click', () => {
+			switchLevel(mainState, 2);
+		});
+	}
+
 	// Show welcome message
 	setTimeout(() => {
 		showMessage(

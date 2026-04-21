@@ -12,7 +12,7 @@ import { showMessage } from './main.js';
 // ─── Constants ────────────────────────────────────────────────
 const TOTAL_HOTSPOTS = 12;
 const GAME_TYPES = ['tilematch', 'riddle', 'tofuhunter', 'phototilematch'];
-const MAX_DAILY_PLAYS = 10; // Optional limit on POI plays per day
+const MAX_DAILY_PLAYS = 999; // Effectively unlimited - players can always get more seeds
 
 // ─── POI State Management ─────────────────────────────────────
 let poiState = null;
@@ -117,13 +117,13 @@ function playPOI(hotspotId, gameState, onComplete) {
 		return;
 	}
 
-	// Check daily limit (optional)
+	// Check daily limit (optional) - now set very high to allow unlimited seed collection
 	if (gameState.poisPlayedToday >= MAX_DAILY_PLAYS) {
 		showMessage(
 			'⏰',
-			`<strong>Take a break!</strong><br>
-			You've played ${MAX_DAILY_PLAYS} games today.<br>
-			Come back tomorrow for more seeds!`,
+			`<strong>Wow! You've played a lot today!</strong><br>
+			Take a break and come back tomorrow.<br>
+			You can still tend to your plants!`,
 			null
 		);
 		return;

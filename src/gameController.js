@@ -84,15 +84,25 @@ export function waterPlant(state, potIndex) {
  */
 export function playDrums(state) {
 	if (state.dailyActions.drumsPlayed >= DAILY_REQUIREMENTS.drumsNeeded) {
-		return { success: false, message: 'Drums already played enough today!' };
+		return { success: false, message: '🥁 Drums already played enough today! Your egg has heard enough music!' };
 	}
 
 	state.dailyActions.drumsPlayed++;
 
+	const remaining = DAILY_REQUIREMENTS.drumsNeeded - state.dailyActions.drumsPlayed;
+
+	if (remaining === 0) {
+		return {
+			success: true,
+			message: `🥁 Played drums! Your egg has heard enough music for today! (${state.dailyActions.drumsPlayed}/${DAILY_REQUIREMENTS.drumsNeeded} complete) 🎵`,
+			complete: true
+		};
+	}
+
 	return {
 		success: true,
-		message: `Played drums! ${state.dailyActions.drumsPlayed}/${DAILY_REQUIREMENTS.drumsNeeded}`,
-		complete: state.dailyActions.drumsPlayed >= DAILY_REQUIREMENTS.drumsNeeded
+		message: `🥁 Played drums! ${remaining} more drum session${remaining !== 1 ? 's' : ''} needed for the egg today! (${state.dailyActions.drumsPlayed}/${DAILY_REQUIREMENTS.drumsNeeded})`,
+		complete: false
 	};
 }
 
